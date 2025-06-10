@@ -1,0 +1,165 @@
+{
+  "common": {
+    "appName": "PropertyPro Europe",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "view": "View",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "all": "All",
+    "add": "Add"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "units": "Units",
+    "tenants": "Tenants",
+    "leases": "Leases",
+    "invoices": "Invoices",
+    "maintenance": "Maintenance",
+    "reports": "Reports",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "company": "Company",
+    "country": "Country",
+    "createAccount": "Create Account",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "landing": {
+    "hero": {
+      "title": "Property Management Simplified for European Landlords",
+      "subtitle": "The complete solution for managing properties, tenants, and finances across Europe.",
+      "cta": "Get Started",
+      "demo": "Request Demo"
+    },
+    "features": {
+      "title": "Features",
+      "propertyManagement": {
+        "title": "Property Management",
+        "description": "Easily manage properties across multiple countries with localized compliance."
+      },
+      "tenantManagement": {
+        "title": "Tenant Management",
+        "description": "Screen tenants, manage leases, and communicate effectively."
+      },
+      "financialTools": {
+        "title": "Financial Tools",
+        "description": "Generate invoices, track payments, and manage VAT rates across jurisdictions."
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "description": "Streamline maintenance requests and track their status."
+      }
+    },
+    "pricing": {
+      "title": "Simple, Transparent Pricing",
+      "starter": {
+        "title": "Starter",
+        "price": "€49",
+        "unit": "per month",
+        "description": "Perfect for small landlords managing a few properties.",
+        "features": [
+          "Up to 10 units",
+          "Basic reporting",
+          "Tenant screening",
+          "Email support"
+        ],
+        "cta": "Start Free Trial"
+      },
+      "professional": {
+        "title": "Professional",
+        "price": "€99",
+        "unit": "per month",
+        "description": "Ideal for growing property portfolios with multiple properties.",
+        "features": [
+          "Up to 50 units",
+          "Advanced reporting",
+          "Document storage",
+          "Email & phone support"
+        ],
+        "cta": "Start Free Trial"
+      },
+      "enterprise": {
+        "title": "Enterprise",
+        "price": "Custom",
+        "description": "Tailored solutions for large property management companies.",
+        "features": [
+          "Unlimited units",
+          "Custom integrations",
+          "Dedicated account manager",
+          "24/7 priority support"
+        ],
+        "cta": "Contact Sales"
+      }
+    },
+    "testimonials": {
+      "title": "Trusted by Property Managers Across Europe",
+      "testimonial1": {
+        "quote": "PropertyPro Europe has streamlined our operations across multiple countries. The localization features save us countless hours.",
+        "author": "Maria Schmidt",
+        "company": "Urban Housing Berlin"
+      },
+      "testimonial2": {
+        "quote": "Managing VAT rates across different countries used to be a nightmare. Now it's automated and always compliant.",
+        "author": "Jean Dupont",
+        "company": "Paris Properties Ltd"
+      },
+      "testimonial3": {
+        "quote": "The tenant screening and lease management tools have reduced our vacancy rates by 30%.",
+        "author": "Carlos Fernandez",
+        "company": "Barcelona Residences"
+      }
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "summary": "Portfolio Summary",
+    "totalProperties": "Total Properties",
+    "totalUnits": "Total Units",
+    "occupancyRate": "Occupancy Rate",
+    "rentCollection": "Rent Collection Rate",
+    "upcomingExpiries": "Upcoming Lease Expiries",
+    "maintenanceRequests": "Maintenance Requests",
+    "recentActivity": "Recent Activity",
+    "quickActions": "Quick Actions",
+    "addProperty": "Add Property",
+    "addTenant": "Add Tenant",
+    "generateInvoice": "Generate Invoice",
+    "createRequest": "New Maintenance Request"
+  },
+  "properties": {
+    "title": "Properties",
+    "newProperty": "New Property",
+    "name": "Name",
+    "address": "Address",
+    "city": "City",
+    "postalCode": "Postal Code",
+    "region": "Region",
+    "country": "Country",
+    "units": "Units",
+    "vacancyRate": "Vacancy Rate",
+    "defaultVat": "Default VAT",
+    "propertyType": "Property Type",
+    "residential": "Residential",
+    "commercial": "Commercial",
+    "mixed": "Mixed Use",
+    "hasVacancies": "Has Vacancies",
+    "fullyOccupied": "Fully Occupied"
+  }
+}
