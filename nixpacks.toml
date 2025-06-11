@@ -1,11 +1,23 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x"]
+nixPkgs = ["nodejs-18_x", "postgresql"]
+aptPkgs = ["libpq-dev", "build-essential"]
 
 [phases.install]
-cmds = ["cd frontend && npm install"]
+cmds = [
+  "cd frontend && npm install",
+  "cd backend && pip install -r requirements.txt"
+]
 
 [phases.build]
-cmds = ["cd frontend && npm run build"]
+cmds = [
+  "cd frontend && npm run build",
+  "mkdir -p /app/static",
+  "cp -r frontend/dist/* /app/static/"
+]
 
 [start]
-cmd = "cd frontend && npm start"
+cmd = "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+
+[variables]
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"
