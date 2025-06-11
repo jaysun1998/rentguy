@@ -1,0 +1,71 @@
+{
+  "common": {
+    "appName": "PropertyPro Europe",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "view": "Voir",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "all": "Tous",
+    "add": "Ajouter"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "properties": "Propriétés",
+    "units": "Unités",
+    "tenants": "Locataires",
+    "leases": "Baux",
+    "invoices": "Factures",
+    "maintenance": "Maintenance",
+    "reports": "Rapports",
+    "settings": "Paramètres",
+    "profile": "Profil"
+  },
+  "auth": {
+    "signIn": "Connexion",
+    "signUp": "Inscription",
+    "signOut": "Déconnexion",
+    "email": "Email",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "company": "Entreprise",
+    "country": "Pays",
+    "createAccount": "Créer un compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "dontHaveAccount": "Vous n'avez pas de compte ?"
+  },
+  "landing": {
+    "hero": {
+      "title": "Gestion immobilière simplifiée pour les propriétaires européens",
+      "subtitle": "La solution complète pour gérer les propriétés, les locataires et les finances à travers l'Europe.",
+      "cta": "Commencer",
+      "demo": "Demander une démo"
+    },
+    "features": {
+      "title": "Fonctionnalités",
+      "propertyManagement": {
+        "title": "Gestion immobilière",
+        "description": "Gérez facilement les propriétés dans plusieurs pays avec une conformité localisée."
+      },
+      "tenantManagement": {
+        "title": "Gestion des locataires",
+        "description": "Examinez les locataires, gérez les baux et communiquez efficacement."
+      },
+      "financialTools": {
+        "title": "Outils financiers",
+        "description": "Générez des factures, suivez les paiements et gérez les taux de TVA dans différentes juridictions."
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "description": "Rationalisez les demandes de maintenance et suivez leur statut."
+      }
+    }
+  }
+}

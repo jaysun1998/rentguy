@@ -1,0 +1,71 @@
+{
+  "common": {
+    "appName": "PropertyPro Europe",
+    "loading": "Cargando...",
+    "error": "Se ha producido un error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "view": "Ver",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "all": "Todos",
+    "add": "Añadir"
+  },
+  "nav": {
+    "dashboard": "Tablero",
+    "properties": "Propiedades",
+    "units": "Unidades",
+    "tenants": "Inquilinos",
+    "leases": "Contratos",
+    "invoices": "Facturas",
+    "maintenance": "Mantenimiento",
+    "reports": "Informes",
+    "settings": "Ajustes",
+    "profile": "Perfil"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "signOut": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidó su contraseña?",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "company": "Empresa",
+    "country": "País",
+    "createAccount": "Crear cuenta",
+    "alreadyHaveAccount": "¿Ya tiene una cuenta?",
+    "dontHaveAccount": "¿No tiene una cuenta?"
+  },
+  "landing": {
+    "hero": {
+      "title": "Gestión de propiedades simplificada para propietarios europeos",
+      "subtitle": "La solución completa para gestionar propiedades, inquilinos y finanzas en toda Europa.",
+      "cta": "Comenzar",
+      "demo": "Solicitar Demo"
+    },
+    "features": {
+      "title": "Características",
+      "propertyManagement": {
+        "title": "Gestión de propiedades",
+        "description": "Gestione fácilmente propiedades en varios países con cumplimiento localizado."
+      },
+      "tenantManagement": {
+        "title": "Gestión de inquilinos",
+        "description": "Evalúe inquilinos, gestione contratos y comuníquese de manera efectiva."
+      },
+      "financialTools": {
+        "title": "Herramientas financieras",
+        "description": "Genere facturas, realice un seguimiento de los pagos y gestione las tasas de IVA en diferentes jurisdicciones."
+      },
+      "maintenance": {
+        "title": "Mantenimiento",
+        "description": "Optimice las solicitudes de mantenimiento y realice un seguimiento de su estado."
+      }
+    }
+  }
+}

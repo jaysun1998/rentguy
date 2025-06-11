@@ -1,0 +1,112 @@
+{
+  "common": {
+    "appName": "PropertyPro Europe",
+    "loading": "Wird geladen...",
+    "error": "Ein Fehler ist aufgetreten",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "view": "Anzeigen",
+    "close": "Schließen",
+    "search": "Suchen",
+    "filter": "Filter",
+    "all": "Alle",
+    "add": "Hinzufügen"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "properties": "Immobilien",
+    "units": "Einheiten",
+    "tenants": "Mieter",
+    "leases": "Mietverträge",
+    "invoices": "Rechnungen",
+    "maintenance": "Wartung",
+    "reports": "Berichte",
+    "settings": "Einstellungen",
+    "profile": "Profil"
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "signOut": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "forgotPassword": "Passwort vergessen?",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "company": "Unternehmen",
+    "country": "Land",
+    "createAccount": "Konto erstellen",
+    "alreadyHaveAccount": "Bereits ein Konto?",
+    "dontHaveAccount": "Noch kein Konto?"
+  },
+  "landing": {
+    "hero": {
+      "title": "Immobilienverwaltung vereinfacht für europäische Vermieter",
+      "subtitle": "Die komplette Lösung für die Verwaltung von Immobilien, Mietern und Finanzen in ganz Europa.",
+      "cta": "Jetzt starten",
+      "demo": "Demo anfragen"
+    },
+    "features": {
+      "title": "Funktionen",
+      "propertyManagement": {
+        "title": "Immobilienverwaltung",
+        "description": "Verwalten Sie Immobilien in mehreren Ländern mit lokalisierter Compliance."
+      },
+      "tenantManagement": {
+        "title": "Mieterverwaltung",
+        "description": "Überprüfen Sie Mieter, verwalten Sie Mietverträge und kommunizieren Sie effektiv."
+      },
+      "financialTools": {
+        "title": "Finanztools",
+        "description": "Erstellen Sie Rechnungen, verfolgen Sie Zahlungen und verwalten Sie die Mehrwertsteuersätze in verschiedenen Rechtsgebieten."
+      },
+      "maintenance": {
+        "title": "Wartung",
+        "description": "Optimieren Sie Wartungsanfragen und verfolgen Sie deren Status."
+      }
+    },
+    "pricing": {
+      "title": "Einfache, transparente Preise",
+      "starter": {
+        "title": "Starter",
+        "price": "€49",
+        "unit": "pro Monat",
+        "description": "Perfekt für kleine Vermieter, die einige wenige Immobilien verwalten.",
+        "features": [
+          "Bis zu 10 Einheiten",
+          "Grundlegende Berichterstattung",
+          "Mieterüberprüfung",
+          "E-Mail-Support"
+        ],
+        "cta": "Kostenlose Testversion starten"
+      },
+      "professional": {
+        "title": "Professional",
+        "price": "€99",
+        "unit": "pro Monat",
+        "description": "Ideal für wachsende Immobilienportfolios mit mehreren Objekten.",
+        "features": [
+          "Bis zu 50 Einheiten",
+          "Erweiterte Berichterstattung",
+          "Dokumentenspeicherung",
+          "E-Mail- & Telefon-Support"
+        ],
+        "cta": "Kostenlose Testversion starten"
+      },
+      "enterprise": {
+        "title": "Enterprise",
+        "price": "Individuell",
+        "description": "Maßgeschneiderte Lösungen für große Immobilienverwaltungsunternehmen.",
+        "features": [
+          "Unbegrenzte Einheiten",
+          "Benutzerdefinierte Integrationen",
+          "Dedizierter Account Manager",
+          "24/7 Priority Support"
+        ],
+        "cta": "Vertrieb kontaktieren"
+      }
+    }
+  }
+}
