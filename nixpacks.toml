@@ -12,11 +12,12 @@ cmds = [
 cmds = [
   "cd frontend && npm run build",
   "mkdir -p /app/static",
-  "cp -r frontend/dist/* /app/static/"
+  "cp -r frontend/dist/* /app/static/",
+  "chmod +x backend/start.sh"
 ]
 
 [start]
-cmd = "sh -c 'cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT'"
+cmd = "sh -c 'cd backend && ./start.sh'"
 
 [variables]
 PYTHONUNBUFFERED = "1"

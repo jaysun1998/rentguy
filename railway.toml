@@ -3,17 +3,36 @@
 
 [build]
 builder = "nixpacks"
-buildCommand = "echo 'Building both frontend and backend services'"
+buildCommand = "echo 'Building both frontend and backend services' && chmod +x backend/start.sh"
 
 [deploy]
-startCommand = "sh -c 'cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT'"
+startCommand = "sh -c 'cd backend && ./start.sh'"
 healthcheckPath = "/api/v1/health"
 healthcheckTimeout = 60
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 5
 
 [env]
+# Database configuration
 DATABASE_URL = "${DATABASE_URL}"
+POSTGRES_USER = "${POSTGRES_USER}"
+POSTGRES_PASSWORD = "${POSTGRES_PASSWORD}"
+POSTGRES_DB = "${POSTGRES_DB}"
+
+# Security and authentication
 SECRET_KEY = "${SECRET_KEY}"
+ACCESS_TOKEN_EXPIRE_MINUTES = "60"
+ALGORITHM = "HS256"
+
+# First superuser credentials
 FIRST_SUPERUSER_EMAIL = "${FIRST_SUPERUSER_EMAIL}"
 FIRST_SUPERUSER_PASSWORD = "${FIRST_SUPERUSER_PASSWORD}"
 FIRST_SUPERUSER_FIRST_NAME = "${FIRST_SUPERUSER_FIRST_NAME}"
 FIRST_SUPERUSER_LAST_NAME = "${FIRST_SUPERUSER_LAST_NAME}"
+
+# Backend CORS configuration
+BACKEND_CORS_ORIGINS = '["*"]'
+
+# Python configuration
+PYTHONUNBUFFERED = "1"
+PYTHONDONTWRITEBYTECODE = "1"

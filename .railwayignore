@@ -1,0 +1,29 @@
+# Development files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env.example
+*.log
+.DS_Store
+
+# Git related
+.git/
+.gitignore
+
+# Local development configurations
+.vscode/
+.idea/
+
+# Documentation
+*.md
+backlog.*
+datamodel.*
+prd.*
+sprintplan.*
+RULES.md
+LICENSE
+
+# Backup files
+*.bak
