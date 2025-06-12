@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:8001';
+// In development, the Vite proxy will handle the request to the backend
+const API_BASE_URL = import.meta.env.DEV ? '/api' : 'http://localhost:8001';
 
 export interface ApiResponse<T> {
   data: T;
