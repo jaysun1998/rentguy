@@ -102,7 +102,7 @@ class ApiService {
       
       console.log('Sending signup request with data:', requestData);
       
-      const response = await fetch(`${this.baseUrl}/auth/signup`, {
+      const response = await fetch(`${this.baseUrl}/api/v1/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,20 +112,29 @@ class ApiService {
       });
 
       let responseData;
+      const responseText = await response.text();
+      
       try {
-        responseData = await response.json();
+        responseData = responseText ? JSON.parse(responseText) : {};
       } catch (e) {
-        console.error('Failed to parse JSON response:', e);
-        throw new Error(`Server responded with status ${response.status}: ${response.statusText}`);
+        console.error('Failed to parse JSON response. Response text:', responseText);
+        throw new Error(`Invalid server response: ${response.status} ${response.statusText}`);
       }
       
       if (!response.ok) {
         console.error('Signup error response:', {
           status: response.status,
           statusText: response.statusText,
-          data: responseData,
+          headers: Object.fromEntries(response.headers.entries()),
+          responseText,
+          parsedData: responseData
         });
-        throw new Error(responseData.detail || 'Failed to create account');
+        
+        const errorMessage = responseData.detail || 
+                           responseData.message || 
+                           response.statusText ||
+                           'Failed to create account';
+        throw new Error(errorMessage);
       }
 
       console.log('Signup successful:', responseData);

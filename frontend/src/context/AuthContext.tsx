@@ -53,11 +53,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signup = async (userData: Partial<User> & { password: string }) => {
     setIsLoading(true);
     try {
+      if (!userData.email || !userData.password || !userData.firstName || !userData.lastName) {
+        throw new Error('Missing required fields');
+      }
+
       const signupData: any = {
-        email: userData.email!,
+        email: userData.email,
         password: userData.password,
-        firstName: userData.firstName!,
-        lastName: userData.lastName!,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         country: userData.country || 'gb' // Default to 'gb' if not provided
       };
       
@@ -66,15 +70,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         signupData.company = userData.company;
       }
       
+      console.log('Attempting signup with data:', signupData);
       await apiService.signup(signupData);
       
-      // After successful signup, log the user in
-      await login(userData.email!, userData.password);
-      
-      // Get the updated user data after login
-      const userResponse = await apiService.getCurrentUser();
-      setUser(userResponse as User);
+      try {
+        // After successful signup, log the user in
+        await login(userData.email, userData.password);
+        
+        // Get the updated user data after login
+        const userResponse = await apiService.getCurrentUser();
+        setUser(userResponse as User);
+      } catch (loginError) {
+        console.error('Login after signup failed:', loginError);
+        // Even if login fails, the account was created, so we'll just log the error
+        // and let the user know they need to log in manually
+        throw new Error('Account created successfully, but automatic login failed. Please log in manually.');
+      }
     } catch (error) {
+      console.error('Signup error:', error);
       throw error;
     } finally {
       setIsLoading(false);
