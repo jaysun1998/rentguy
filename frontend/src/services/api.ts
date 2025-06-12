@@ -96,24 +96,40 @@ class ApiService {
         password: userData.password,
         first_name: userData.firstName,
         last_name: userData.lastName,
-        ...(userData.company && { company: userData.company }),
-        ...(userData.country && { country: userData.country })
+        ...(userData.country && { country: userData.country }),
+        ...(userData.company && { company: userData.company }), // Optional field
       };
-
-      const response = await fetch(`${this.baseUrl}/api/v1/auth/signup`, {
+      
+      console.log('Sending signup request with data:', requestData);
+      
+      const response = await fetch(`${this.baseUrl}/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(requestData),
       });
 
+      let responseData;
+      try {
+        responseData = await response.json();
+      } catch (e) {
+        console.error('Failed to parse JSON response:', e);
+        throw new Error(`Server responded with status ${response.status}: ${response.statusText}`);
+      }
+      
       if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.detail || 'Failed to create account');
+        console.error('Signup error response:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: responseData,
+        });
+        throw new Error(responseData.detail || 'Failed to create account');
       }
 
-      return response.json();
+      console.log('Signup successful:', responseData);
+      return responseData;
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
