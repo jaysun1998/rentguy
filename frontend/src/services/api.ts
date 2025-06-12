@@ -33,18 +33,24 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    };
+    const headers: Record<string, string> = {};
+    
+    // Add Content-Type if not already set
+    if (!options.headers || !('Content-Type' in (options.headers as Record<string, string>))) {
+      headers['Content-Type'] = 'application/json';
+    }
 
+    // Add Authorization header if token exists
     if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+      headers['Authorization'] = `Bearer ${this.token}`;
     }
 
     const response = await fetch(url, {
       ...options,
-      headers,
+      headers: {
+        ...headers,
+        ...(options.headers as Record<string, string> || {})
+      },
     });
 
     if (!response.ok) {
@@ -82,14 +88,56 @@ class ApiService {
     company?: string;
     country?: string;
   }) {
-    return this.request('/api/v1/auth/signup', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
+    try {
+      // Convert camelCase to snake_case for backend compatibility
+      const requestData = {
+        email: userData.email,
+        password: userData.password,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        ...(userData.company && { company: userData.company }),
+        ...(userData.country && { country: userData.country })
+      };
+
+      const response = await fetch(`${this.baseUrl}/api/v1/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || 'Failed to create account');
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Signup error:', error);
+      throw error;
+    }
   }
 
   async getCurrentUser() {
-    return this.request('/api/v1/auth/me');
+    const response = await this.request<{
+      id: string;
+      email: string;
+      first_name: string;
+      last_name: string;
+      company?: string;
+      country: string;
+    }>('/api/v1/auth/me');
+
+    // Convert snake_case to camelCase for frontend
+    return {
+      id: response.id,
+      email: response.email,
+      firstName: response.first_name,
+      lastName: response.last_name,
+      company: response.company,
+      country: response.country
+    };
   }
 
   // Properties endpoints

@@ -38,7 +38,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       apiService.setToken(response.access_token);
       
       // Get user info
-      const userResponse = await apiService.getCurrentUser();
+      const userResponse = await apiService.getCurrentUser() as User;
       
       // Store user in localStorage and state
       localStorage.setItem('user', JSON.stringify(userResponse));
@@ -53,17 +53,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signup = async (userData: Partial<User> & { password: string }) => {
     setIsLoading(true);
     try {
-      const response = await apiService.signup({
+      const signupData: any = {
         email: userData.email!,
         password: userData.password,
         firstName: userData.firstName!,
         lastName: userData.lastName!,
-        company: userData.company,
-        country: userData.country
-      });
+        country: userData.country || 'gb' // Default to 'gb' if not provided
+      };
+      
+      // Only include company if it's provided
+      if (userData.company) {
+        signupData.company = userData.company;
+      }
+      
+      await apiService.signup(signupData);
       
       // After successful signup, log the user in
       await login(userData.email!, userData.password);
+      
+      // Get the updated user data after login
+      const userResponse = await apiService.getCurrentUser();
+      setUser(userResponse as User);
     } catch (error) {
       throw error;
     } finally {
