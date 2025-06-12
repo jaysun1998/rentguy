@@ -2,12 +2,24 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
+from urllib.parse import urlparse
+from app.core.config import settings
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"  # Will be overridden by env var
+# Use DATABASE_URL from settings
+database_url = settings.DATABASE_URL
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+# Parse the URL to determine the database type
+parsed_url = urlparse(database_url)
+
+# Create engine with appropriate configuration
+if parsed_url.scheme.startswith('sqlite'):
+    engine = create_engine(
+        database_url, connect_args={"check_same_thread": False}
+    )
+else:
+    # For PostgreSQL and other databases, don't use check_same_thread
+    engine = create_engine(database_url)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
