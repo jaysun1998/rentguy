@@ -100,9 +100,11 @@ class ApiService {
         ...(userData.company && { company: userData.company }), // Optional field
       };
       
-      console.log('Sending signup request with data:', requestData);
+      const url = `${this.baseUrl}/auth/signup`;
+      console.log('Sending signup request to:', url);
+      console.log('Request data:', requestData);
       
-      const response = await fetch(`${this.baseUrl}/api/v1/auth/signup`, {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -111,11 +113,14 @@ class ApiService {
         body: JSON.stringify(requestData),
       });
 
-      let responseData;
+      console.log('Signup response status:', response.status);
       const responseText = await response.text();
+      console.log('Raw response text:', responseText);
       
+      let responseData;
       try {
         responseData = responseText ? JSON.parse(responseText) : {};
+        console.log('Parsed response data:', responseData);
       } catch (e) {
         console.error('Failed to parse JSON response. Response text:', responseText);
         throw new Error(`Invalid server response: ${response.status} ${response.statusText}`);
