@@ -1,18 +1,29 @@
 // Determine the base URL based on the environment
 const getApiBaseUrl = () => {
-  // For web container environments (like StackBlitz, CodeSandbox, etc.)
-  if (window.location.hostname.includes('webcontainer.io') || 
-      window.location.hostname.includes('stackblitz.io') ||
-      window.location.hostname.includes('codesandbox.io')) {
-    // Use the full backend URL if provided via environment variable, otherwise use a placeholder
-    return import.meta.env.VITE_API_URL || 'https://your-deployed-backend-url.com/api/v1';
+  // 1. Check for environment variable first (highest priority)
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
   }
-  // For local development with Vite proxy
+  
+  // 2. Check for web container environments (like StackBlitz, CodeSandbox, etc.)
+  const isWebContainer = window.location.hostname.includes('webcontainer.io') || 
+                       window.location.hostname.includes('stackblitz.io') ||
+                       window.location.hostname.includes('codesandbox.io');
+  
+  if (isWebContainer) {
+    // For web containers, we need to use the full URL to the backend
+    // This should be set in the environment variables of your web container
+    return 'https://your-deployed-backend-url.com/api/v1';
+  }
+  
+  // 3. For local development with Vite proxy
   if (import.meta.env.DEV) {
+    // Use relative URL which will be proxied by Vite
     return '/api';
   }
-  // For production
-  return 'http://localhost:8001';
+  
+  // 4. Default production URL (should be overridden by VITE_API_URL in production)
+  return '/api/v1';
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -62,21 +73,27 @@ class ApiService {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     
-    console.log(`[API] Making request to: ${url}`, { options });
-    
-    // Create a new headers object with proper typing
-    const headers = new Headers({
-      'Content-Type': 'application/json',
-      ...(this.token ? { 'Authorization': `Bearer ${this.token}` } : {})
+    console.log(`[API] Making request to: ${url}`, { 
+      ...options,
+      headers: {
+        ...Object.fromEntries(new Headers(options.headers).entries()),
+        ...(this.token ? { 'Authorization': `Bearer ${this.token}` } : {})
+      },
+      // Don't log the full request body as it might contain sensitive data
+      body: options.body ? '[REDACTED]' : undefined,
     });
     
-    // Add any additional headers from options
-    if (options.headers) {
-      Object.entries(options.headers).forEach(([key, value]) => {
-        if (value) {
-          headers.set(key, String(value));
-        }
-      });
+    // Create headers
+    const headers = new Headers(options.headers);
+    
+    // Set default headers if not already set
+    if (!headers.has('Content-Type') && options.body) {
+      headers.set('Content-Type', 'application/json');
+    }
+    
+    // Add auth token if available
+    if (this.token && !headers.has('Authorization')) {
+      headers.set('Authorization', `Bearer ${this.token}`);
     }
 
     try {
@@ -85,42 +102,100 @@ class ApiService {
         headers,
       });
 
-      console.log(`[API] Response status: ${response.status} ${response.statusText}`, { url });
-
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-          console.error('[API] Error response data:', errorData);
-        } catch (e) {
-          const text = await response.text();
-          console.error('[API] Failed to parse error response:', text);
-          errorData = { detail: `HTTP ${response.status}: ${response.statusText}` };
-        }
-        
-        throw new ApiError(
-          errorData.detail || 
-          errorData.message || 
-          `Request failed with status ${response.status}`,
-          response.status
-        );
-      }
+      const responseClone = response.clone(); // Clone the response for error handling
+      
+      console.log(`[API] Response status: ${response.status} ${response.statusText}`, { 
+        url,
+        headers: Object.fromEntries(response.headers.entries())
+      });
 
       try {
         const data = await response.json();
+        
+        if (!response.ok) {
+          console.error('[API] Error response data:', data);
+          throw new ApiError(
+            data.detail || data.message || `Request failed with status ${response.status}`,
+            response.status,
+            data
+          );
+        }
+        
         console.log('[API] Response data:', data);
         return data;
-      } catch (e) {
-        console.error('[API] Failed to parse response as JSON:', e);
-        throw new ApiError('Failed to parse server response');
+        
+      } catch (jsonError) {
+        // If we can't parse JSON, try to get the response as text
+        if (jsonError instanceof SyntaxError) {
+          const text = await responseClone.text();
+          if (!response.ok) {
+            console.error('[API] Non-JSON error response:', text);
+            throw new ApiError(
+              `Request failed with status ${response.status}: ${text}`,
+              response.status,
+              { raw: text }
+            );
+          }
+          // If the response is OK but not JSON, return the text
+          return text as unknown as T;
+        }
+        
+        // Re-throw other errors
+        console.error('[API] Error processing response:', jsonError);
+        throw new ApiError('Failed to process server response');
       }
     } catch (error) {
-      console.error('[API] Request failed:', error);
+      // Log additional debug information
+      console.error('[API] Request failed:', {
+        error,
+        endpoint,
+        baseUrl: this.baseUrl,
+        fullUrl: `${this.baseUrl}${endpoint}`,
+        isSecure: window.location.protocol === 'https:',
+        isLocalhost: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+        environment: import.meta.env.MODE,
+      });
+
+      // Handle network errors
+      if (error instanceof TypeError) {
+        if (error.message.includes('fetch') || error.message.includes('NetworkError')) {
+          throw new ApiError(
+            'Unable to connect to the server. Please check if the backend server is running and accessible.',
+            0, // 0 status code indicates network error
+            { 
+              originalError: error.message,
+              suggestion: this.baseUrl.startsWith('http://localhost') ? 
+                'Make sure the backend server is running on localhost' :
+                'If running in a web container, verify the backend URL is correctly configured in environment variables (VITE_API_URL)'
+            }
+          );
+        }
+      }
+      
+      // Handle connection refused errors
+      if (error instanceof Error && 
+          (error.message.includes('ECONNREFUSED') || 
+           error.message.includes('Failed to fetch'))) {
+        throw new ApiError(
+          `Could not connect to the server at ${this.baseUrl}. Please make sure the backend server is running.`,
+          0,
+          {
+            originalError: error.message,
+            suggestion: 'If running locally, start the backend server with `uvicorn app.main:app --reload`'
+          }
+        );
+      }
+      
+      // Re-throw ApiError instances as is
       if (error instanceof ApiError) {
         throw error;
       }
+      
+      // Wrap other errors in ApiError
       throw new ApiError(
-        error instanceof Error ? error.message : 'Network error. Please check your connection.'
+        error instanceof Error ? error.message : 'An unknown error occurred',
+        undefined,
+        error
       );
     }
   }
@@ -185,9 +260,9 @@ class ApiService {
     company?: string;
     country?: string;
   }) {
-    console.log('[API] Starting signup process for:', userData.email);
-    
     try {
+      console.log('[API] Starting signup process for:', userData.email);
+      
       // Convert camelCase to snake_case for backend compatibility
       const requestData = {
         email: userData.email,
@@ -198,21 +273,21 @@ class ApiService {
         ...(userData.company && { company: userData.company }), // Optional field
       };
       
+      // Log the request without sensitive data
       console.log('[API] Sending signup request with data:', {
         ...requestData,
-        password: '[REDACTED]' // Don't log the actual password
+        password: '[REDACTED]'
       });
       
-      const response = await this.request('/auth/signup', {
+      // Make the request - the request handler will handle the response
+      return await this.request<{ email: string; id: string }>('/auth/signup', {
         method: 'POST',
         body: JSON.stringify(requestData),
         headers: {
           'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
       });
-      
-      console.log('[API] Signup successful:', response);
-      return response;
       
     } catch (error: unknown) {
       console.error('[API] Signup failed:', {
