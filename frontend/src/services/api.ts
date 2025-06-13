@@ -100,18 +100,24 @@ class ApiService {
         ...(userData.company && { company: userData.company }), // Optional field
       };
       
-      const url = `${this.baseUrl}/auth/signup`;
+      const url = `${this.baseUrl}/api/v1/auth/signup`;
       console.log('Sending signup request to:', url);
       console.log('Request data:', requestData);
       
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
+      let response;
+      try {
+        response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(requestData),
+        });
+      } catch (networkError) {
+        console.error('Network error during signup:', networkError);
+        throw new Error('Network error. Please check your connection and try again.');
+      }
 
       console.log('Signup response status:', response.status);
       const responseText = await response.text();
@@ -127,26 +133,53 @@ class ApiService {
       }
       
       if (!response.ok) {
-        console.error('Signup error response:', {
+        const errorDetails = {
           status: response.status,
           statusText: response.statusText,
           headers: Object.fromEntries(response.headers.entries()),
           responseText,
           parsedData: responseData
-        });
+        };
         
-        const errorMessage = responseData.detail || 
-                           responseData.message || 
-                           response.statusText ||
-                           'Failed to create account';
-        throw new Error(errorMessage);
+        console.error('Signup error response:', errorDetails);
+        
+        // Try to extract a meaningful error message
+        let errorMessage = 'Failed to create account';
+        if (responseData.detail) {
+          errorMessage = responseData.detail;
+        } else if (responseData.message) {
+          errorMessage = responseData.message;
+        } else if (responseData.errors) {
+          // Handle validation errors
+          const errorMessages = Object.entries(responseData.errors)
+            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+            .join('; ');
+          errorMessage = errorMessages || errorMessage;
+        } else if (response.status === 500) {
+          errorMessage = 'Internal server error. Please try again later.';
+        }
+        
+        const error = new Error(errorMessage);
+        // @ts-ignore - Adding additional properties to error object
+        error.details = errorDetails;
+        throw error;
       }
 
       console.log('Signup successful:', responseData);
       return responseData;
-    } catch (error) {
-      console.error('Signup error:', error);
-      throw error;
+    } catch (error: unknown) {
+      console.error('Signup error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        name: error instanceof Error ? error.name : 'Error',
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error && typeof error === 'object' && 'details' in error 
+          ? (error as any).details 
+          : undefined
+      });
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unknown error occurred during signup');
     }
   }
 
