@@ -68,7 +68,8 @@ class ApiService {
     formData.append('username', email);
     formData.append('password', password);
 
-    const response = await fetch(`${this.baseUrl}/api/v1/auth/login/access-token`, {
+    // Remove the /v1 since Vite proxy is already adding it
+    const response = await fetch(`${this.baseUrl}/auth/login/access-token`, {
       method: 'POST',
       body: formData,
     });
@@ -100,7 +101,8 @@ class ApiService {
         ...(userData.company && { company: userData.company }), // Optional field
       };
       
-      const url = `${this.baseUrl}/api/v1/auth/signup`;
+      // Remove the /v1 since Vite proxy is already adding it
+      const url = `${this.baseUrl}/auth/signup`;
       console.log('Sending signup request to:', url);
       console.log('Request data:', requestData);
       
