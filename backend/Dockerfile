@@ -17,14 +17,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir poetry==1.5.1
 
 # Copy only requirements to cache them in docker layer
-COPY poetry.lock pyproject.toml /app/
+COPY pyproject.toml poetry.lock ./
 
-# Project initialization
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi --no-dev
+# Install Python dependencies
+RUN pip install --no-cache-dir poetry && \
+    poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi && \
+    pip uninstall -y poetry
 
-# Copy project
+# Install development dependencies for running migrations
+RUN pip install --no-cache-dir alembic psycopg2-binary
+
+# Copy the rest of the application
 COPY . .
+
+# Create a symbolic link for the migrations directory
+RUN mkdir -p /app/migrations && \
+    ln -s /app/app/db/migrations /app/migrations
 
 # Expose the port the app runs on
 EXPOSE 8000
