@@ -1,0 +1,46 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main, fix/sidebar-import ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            cd frontend && npm ci
+          fi
+          if [ -f "backend/requirements.txt" ]; then
+            pip install -r backend/requirements.txt
+          fi
+      
+      - name: Build frontend
+        if: exists('frontend/package.json')
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: Deploy to Railway
+        uses: railwayapp/action@v1.1.0
+        with:
+          environment: production
+          token: ${{ secrets.RAILWAY_TOKEN }}
+          service: rentguy
