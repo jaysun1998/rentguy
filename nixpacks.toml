@@ -4,20 +4,20 @@ aptPkgs = ["libpq-dev", "build-essential"]
 
 [phases.install]
 cmds = [
-  "cd frontend && npm install",
-  "cd backend && pip install -r requirements.txt"
+  "if [ -d \"frontend\" ]; then cd frontend && npm install; fi",
+  "if [ -d \"backend\" ]; then cd backend && pip install -r requirements.txt; fi"
 ]
 
 [phases.build]
 cmds = [
-  "cd frontend && npm run build",
   "mkdir -p /app/static",
-  "cp -r frontend/dist/* /app/static/",
-  "chmod +x backend/start.sh"
+  "if [ -d \"frontend\" ]; then cd frontend && npm run build && cp -r dist/* /app/static/; fi",
+  "if [ -d \"backend\" ]; then mkdir -p /app/backend && cp -r backend/* /app/backend/; fi",
+  "chmod +x /app/backend/start.sh"
 ]
 
 [start]
-cmd = "sh -c 'cd backend && ./start.sh'"
+cmd = "cd /app/backend && ./start.sh"
 
 [variables]
 PYTHONUNBUFFERED = "1"
