@@ -3,10 +3,10 @@
 
 [build]
 builder = "nixpacks"
-buildCommand = "echo 'Building both frontend and backend services' && chmod +x backend/start.sh"
+buildCommand = "echo 'Building both frontend and backend services' && chmod +x start.sh"
 
 [deploy]
-startCommand = "sh -c 'cd backend && ./start.sh'"
+startCommand = "./start.sh"
 healthcheckPath = "/api/v1/health"
 healthcheckTimeout = 60
 restartPolicyType = "on_failure"
