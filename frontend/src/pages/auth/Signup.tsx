@@ -14,7 +14,6 @@ const Signup: React.FC = () => {
     lastName: '',
     email: '',
     password: '',
-    company: '',
     country: 'gb',
   });
   const [error, setError] = useState('');
@@ -130,20 +129,7 @@ const Signup: React.FC = () => {
               />
             </div>
             
-            <div className="mb-4">
-              <label htmlFor="company" className="form-label">
-                {t('auth.company')}
-              </label>
-              <input
-                id="company"
-                name="company"
-                type="text"
-                value={formData.company}
-                onChange={handleChange}
-                className="input w-full"
-              />
-            </div>
-            
+
             <div className="mb-6">
               <label htmlFor="country" className="form-label">
                 {t('auth.country')}

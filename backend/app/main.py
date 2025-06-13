@@ -1,6 +1,9 @@
 import logging
+import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
@@ -29,7 +32,13 @@ app = FastAPI(
 )
 
 # CORS middleware configuration
-cors_origins = settings.BACKEND_CORS_ORIGINS or ["http://localhost:5173", "http://127.0.0.1:5173"]
+cors_origins = settings.BACKEND_CORS_ORIGINS or [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5174",
+    "*"
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -40,6 +49,14 @@ app.add_middleware(
 
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Check if static directory exists (for frontend files)
+static_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "static")
+if os.path.exists(static_directory):
+    logger.info(f"Mounting static files from: {static_directory}")
+    app.mount("/", StaticFiles(directory=static_directory, html=True), name="static")
+else:
+    logger.warning(f"Static directory not found at {static_directory}. Frontend will not be served.")
 
 # Initialize database and create first superuser on startup
 @app.on_event("startup")
@@ -82,11 +99,11 @@ async def health_check():
     finally:
         db.close()
 
-# Root endpoint
-@app.get("/")
-async def root():
+# API Root endpoint
+@app.get("/api")
+async def api_root():
     """
-    Root endpoint that provides basic API information.
+    API Root endpoint that provides basic API information.
     """
     return {
         "message": "Welcome to RentGuy API",

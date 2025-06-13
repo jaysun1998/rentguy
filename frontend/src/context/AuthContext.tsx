@@ -2,12 +2,19 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../types';
 import { apiService } from '../services/api';
 
+interface SignupData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: Partial<User> & { password: string }) => Promise<void>;
+  signup: (userData: SignupData) => Promise<void>;
   logout: () => void;
 }
 
@@ -38,7 +45,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       apiService.setToken(response.access_token);
       
       // Get user info
-      const userResponse = await apiService.getCurrentUser();
+      const userResponse = await apiService.getCurrentUser() as User;
       
       // Store user in localStorage and state
       localStorage.setItem('user', JSON.stringify(userResponse));
@@ -50,21 +57,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const signup = async (userData: Partial<User> & { password: string }) => {
+  const signup = async (userData: { email: string; password: string; firstName: string; lastName: string }) => {
     setIsLoading(true);
     try {
-      const response = await apiService.signup({
-        email: userData.email!,
+      if (!userData.email || !userData.password || !userData.firstName || !userData.lastName) {
+        throw new Error('Missing required fields');
+      }
+
+      // Only include the fields that match the backend's UserCreate schema
+      const signupData = {
+        email: userData.email,
         password: userData.password,
-        firstName: userData.firstName!,
-        lastName: userData.lastName!,
-        company: userData.company,
-        country: userData.country
-      });
+        firstName: userData.firstName,
+        lastName: userData.lastName
+      };
       
-      // After successful signup, log the user in
-      await login(userData.email!, userData.password);
+      console.log('Attempting signup with data:', signupData);
+      await apiService.signup(signupData);
+      
+      try {
+        // After successful signup, log the user in
+        await login(userData.email, userData.password);
+        
+        // Get the updated user data after login
+        const userResponse = await apiService.getCurrentUser();
+        setUser(userResponse as User);
+      } catch (loginError) {
+        console.error('Login after signup failed:', loginError);
+        // Even if login fails, the account was created, so we'll just log the error
+        // and let the user know they need to log in manually
+        throw new Error('Account created successfully, but automatic login failed. Please log in manually.');
+      }
     } catch (error) {
+      console.error('Signup error:', error);
       throw error;
     } finally {
       setIsLoading(false);

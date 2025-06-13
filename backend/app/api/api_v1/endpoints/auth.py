@@ -54,17 +54,35 @@ async def create_user_signup(
     Create new user without the need to be logged in
     """
     try:
+        print(f"[DEBUG] Received signup request for email: {user_in.email}")
+        print(f"[DEBUG] User data: {user_in.dict()}")
+        
+        # Try to create the user
         user = services.user.create_user(db=db, user_in=user_in)
+        print(f"[DEBUG] Successfully created user with ID: {user.id}")
+        
         return user
     except ValueError as e:
+        error_msg = f"[ERROR] Validation error during signup: {str(e)}"
+        print(error_msg)
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
     except Exception as e:
+        import traceback
+        error_msg = f"[ERROR] Unexpected error during signup: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        
+        # For security, don't expose internal error details in production
+        if "production" in str(settings.ENVIRONMENT).lower():
+            detail = "An error occurred while creating the user."
+        else:
+            detail = f"An error occurred: {str(e)}"
+            
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while creating the user.",
+            detail=detail,
         )
 
 @router.get("/me", response_model=schemas.User)
