@@ -2,12 +2,19 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { User } from '../types';
 import { apiService } from '../services/api';
 
+interface SignupData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: Partial<User> & { password: string }) => Promise<void>;
+  signup: (userData: SignupData) => Promise<void>;
   logout: () => void;
 }
 
@@ -50,25 +57,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const signup = async (userData: Partial<User> & { password: string }) => {
+  const signup = async (userData: { email: string; password: string; firstName: string; lastName: string }) => {
     setIsLoading(true);
     try {
       if (!userData.email || !userData.password || !userData.firstName || !userData.lastName) {
         throw new Error('Missing required fields');
       }
 
-      const signupData: any = {
+      // Only include the fields that match the backend's UserCreate schema
+      const signupData = {
         email: userData.email,
         password: userData.password,
         firstName: userData.firstName,
-        lastName: userData.lastName,
-        country: userData.country || 'gb' // Default to 'gb' if not provided
+        lastName: userData.lastName
       };
-      
-      // Only include company if it's provided
-      if (userData.company) {
-        signupData.company = userData.company;
-      }
       
       console.log('Attempting signup with data:', signupData);
       await apiService.signup(signupData);
