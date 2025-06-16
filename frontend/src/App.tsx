@@ -13,6 +13,7 @@ import Pricing from './pages/Pricing';
 import About from './pages/About';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
+import ForgotPassword from './pages/auth/ForgotPassword';
 import NotFound from './pages/NotFound';
 
 // Dashboard Pages
@@ -55,6 +56,7 @@ function AppContent() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="*" element={<NotFound />} />
       </Route>
       

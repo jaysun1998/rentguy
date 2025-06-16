@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (userData: SignupData) => Promise<{ success: boolean; message?: string; needsManualLogin?: boolean } | { id: string; email: string }>;
   logout: () => void;
+  forgotPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -67,7 +68,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       
       const response = await apiService.signup(userData);
       // Handle successful signup
-      setUser(response);
+      setUser({
+        id: response.id,
+        email: response.email,
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        company: userData.company || '',
+        country: userData.country || ''
+      });
       return response;
     } catch (error) {
       console.error('AuthContext signup error:', error);
@@ -87,6 +95,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     apiService.removeToken();
     setUser(null);
   };
+
+  const forgotPassword = async (email: string) => {
+    setIsLoading(true);
+    try {
+      await apiService.forgotPassword(email);
+    } catch (error) {
+      console.error('AuthContext forgotPassword error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ 
+      user, 
+      isAuthenticated: !!user, 
+      isLoading, 
+      login, 
+      signup, 
+      logout,
+      forgotPassword 
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 
   return (
     <AuthContext.Provider value={{ 

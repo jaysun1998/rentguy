@@ -87,6 +87,15 @@ export type Country = {
   name: string;
 };
 
+export interface SignupData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  company?: string;
+  country?: string;
+}
+
 export const COUNTRIES: Country[] = [
   { code: 'at', name: 'Austria' },
   { code: 'be', name: 'Belgium' },
