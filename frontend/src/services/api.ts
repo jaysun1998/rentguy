@@ -270,9 +270,10 @@ class ApiService {
     lastName: string;
     company?: string;
     country?: string;
-  }) {
+  }): Promise<{ id: string; email: string }> {
     try {
-      console.log('[API] Starting signup process for:', userData.email);
+      // Log the request data for debugging
+      console.log('Signup request data:', userData);
       
       // Convert camelCase to snake_case for backend compatibility
       const requestData = {
@@ -290,46 +291,49 @@ class ApiService {
         password: '[REDACTED]'
       });
       
-      try {
-        const response = await fetch(`${this.baseUrl}/auth/register`, {
-          method: 'POST',
-          body: JSON.stringify(requestData),
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          },
+      const response = await fetch(`${this.baseUrl}/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData)
+      });
+      
+      const data = await response.json().catch(() => ({}));
+      
+      if (!response.ok) {
+        // More detailed error handling
+        const errorMessage = data.message || data.detail || `Signup failed. Status: ${response.status}`;
+        console.error('Signup error details:', {
+          status: response.status,
+          error: data
         });
-
-        const responseData = await response.json().catch(() => ({}));
-        
-        if (!response.ok) {
-          console.error('[API] Signup failed:', {
-            status: response.status,
-            error: responseData,
-          });
-          
-          throw new ApiError(
-            responseData.detail || 
-            responseData.message || 
-            `Signup failed. Please check your input and try again. Status: ${response.status}`,
-            response.status,
-            responseData
-          );
-        }
-
-        if (!responseData.id) {
-          console.error('[API] Invalid signup response:', responseData);
-          throw new ApiError('Invalid server response: no user ID received');
-        }
-
-        console.log('[API] Signup successful');
-        return responseData;
-      } catch (error) {
-        console.error('[API] Signup request failed:', error);
         throw new ApiError(
-          error instanceof Error ? error.message : 'An unknown error occurred during signup'
+          errorMessage,
+          response.status,
+          data
         );
       }
+
+      // Validate response
+      if (!data.id || !data.email) {
+        console.error('Invalid signup response:', data);
+        throw new ApiError('Invalid server response: missing required fields');
+      }
+
+      console.log('[API] Signup successful');
+      return data;
+    } catch (error) {
+      console.error('Signup error:', error);
+      if (error instanceof ApiError) {
+        throw error;
+      }
+      throw new ApiError(
+        error instanceof Error ? error.message : 'An unknown error occurred during signup',
+        500,
+        error instanceof Error ? { originalError: error } : undefined
+      );
+    }
       
     } catch (error: unknown) {
       console.error('[API] Signup failed:', {
