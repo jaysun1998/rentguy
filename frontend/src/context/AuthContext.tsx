@@ -14,7 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: SignupData) => Promise<void>;
+  signup: (userData: SignupData) => Promise<{ success: boolean; message?: string; needsManualLogin?: boolean } | void>;
   logout: () => void;
 }
 
@@ -83,14 +83,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const userResponse = await apiService.getCurrentUser();
         setUser(userResponse as User);
       } catch (loginError) {
-        console.error('Login after signup failed:', loginError);
-        // Even if login fails, the account was created, so we'll just log the error
-        // and let the user know they need to log in manually
-        throw new Error('Account created successfully, but automatic login failed. Please log in manually.');
+        if (loginError instanceof Error) {
+          console.error('Login after signup failed:', loginError);
+          // If login fails but signup succeeded, we'll still return success
+          // but indicate that manual login is needed
+          return {
+            success: true,
+            message: 'Account created successfully. Please log in manually.',
+            needsManualLogin: true
+          };
+        }
+        throw loginError;
       }
     } catch (error) {
       console.error('Signup error:', error);
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('An unexpected error occurred during signup');
     } finally {
       setIsLoading(false);
     }

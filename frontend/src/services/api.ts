@@ -110,24 +110,26 @@ class ApiService {
       });
 
       try {
-        const data = await response.json();
+        const contentType = response.headers.get('content-type') || '';
         
-        if (!response.ok) {
-          console.error('[API] Error response data:', data);
-          throw new ApiError(
-            data.detail || data.message || `Request failed with status ${response.status}`,
-            response.status,
-            data
-          );
-        }
-        
-        console.log('[API] Response data:', data);
-        return data;
-        
-      } catch (jsonError) {
-        // If we can't parse JSON, try to get the response as text
-        if (jsonError instanceof SyntaxError) {
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          
+          if (!response.ok) {
+            console.error('[API] Error response data:', data);
+            throw new ApiError(
+              data.detail || data.message || data.error || `Request failed with status ${response.status}`,
+              response.status,
+              data
+            );
+          }
+          
+          console.log('[API] Response data:', data);
+          return data;
+        } else {
+          // Handle non-JSON responses
           const text = await responseClone.text();
+          
           if (!response.ok) {
             console.error('[API] Non-JSON error response:', text);
             throw new ApiError(
@@ -136,9 +138,18 @@ class ApiService {
               { raw: text }
             );
           }
+          
           // If the response is OK but not JSON, return the text
           return text as unknown as T;
         }
+      } catch (jsonError) {
+        console.error('[API] JSON parsing error:', jsonError);
+        const text = await responseClone.text();
+        throw new ApiError(
+          `Failed to parse server response: ${text}`,
+          response.status,
+          { raw: text, error: jsonError }
+        );
         
         // Re-throw other errors
         console.error('[API] Error processing response:', jsonError);
@@ -279,15 +290,46 @@ class ApiService {
         password: '[REDACTED]'
       });
       
-      // Make the request - the request handler will handle the response
-      return await this.request<{ email: string; id: string }>('/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify(requestData),
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
+      try {
+        const response = await fetch(`${this.baseUrl}/auth/register`, {
+          method: 'POST',
+          body: JSON.stringify(requestData),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const responseData = await response.json().catch(() => ({}));
+        
+        if (!response.ok) {
+          console.error('[API] Signup failed:', {
+            status: response.status,
+            error: responseData,
+          });
+          
+          throw new ApiError(
+            responseData.detail || 
+            responseData.message || 
+            `Signup failed. Please check your input and try again. Status: ${response.status}`,
+            response.status,
+            responseData
+          );
+        }
+
+        if (!responseData.id) {
+          console.error('[API] Invalid signup response:', responseData);
+          throw new ApiError('Invalid server response: no user ID received');
+        }
+
+        console.log('[API] Signup successful');
+        return responseData;
+      } catch (error) {
+        console.error('[API] Signup request failed:', error);
+        throw new ApiError(
+          error instanceof Error ? error.message : 'An unknown error occurred during signup'
+        );
+      }
       
     } catch (error: unknown) {
       console.error('[API] Signup failed:', {
