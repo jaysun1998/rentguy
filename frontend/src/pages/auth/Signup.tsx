@@ -27,11 +27,43 @@ const Signup: React.FC = () => {
     e.preventDefault();
     setError('');
     
+    // Form validation
+    if (!formData.email || !formData.password) {
+      setError('Email and password are required');
+      return;
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    // Password strength validation
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+    
+    // First name validation
+    if (!formData.firstName.trim()) {
+      setError('First name is required');
+      return;
+    }
+    
+    // Last name validation
+    if (!formData.lastName.trim()) {
+      setError('Last name is required');
+      return;
+    }
+    
     try {
       await signup(formData);
-      navigate('/dashboard');
-    } catch (err) {
-      setError('Failed to create account');
+      navigate('/dashboard'); // Redirect on success
+    } catch (error) {
+      console.error('Signup form error:', error);
+      setError(error instanceof Error ? error.message : 'Signup failed. Please try again.');
     }
   };
   

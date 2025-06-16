@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User } from '../types';
-import { apiService } from '../services/api';
+import { apiService, ApiError } from '../services/api';
 
 interface SignupData {
   email: string;
@@ -14,7 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (userData: SignupData) => Promise<{ success: boolean; message?: string; needsManualLogin?: boolean } | void>;
+  signup: (userData: SignupData) => Promise<{ success: boolean; message?: string; needsManualLogin?: boolean } | { id: string; email: string }>;
   logout: () => void;
 }
 
@@ -57,50 +57,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const signup = async (userData: { email: string; password: string; firstName: string; lastName: string }) => {
+  const signup = async (userData: SignupData) => {
     setIsLoading(true);
     try {
-      if (!userData.email || !userData.password || !userData.firstName || !userData.lastName) {
-        throw new Error('Missing required fields');
+      // Validate user data before sending
+      if (!userData.email || !userData.password) {
+        throw new Error('Email and password are required');
       }
-
-      // Only include the fields that match the backend's UserCreate schema
-      const signupData = {
-        email: userData.email,
-        password: userData.password,
-        firstName: userData.firstName,
-        lastName: userData.lastName
-      };
       
-      console.log('Attempting signup with data:', signupData);
-      await apiService.signup(signupData);
-      
-      try {
-        // After successful signup, log the user in
-        await login(userData.email, userData.password);
-        
-        // Get the updated user data after login
-        const userResponse = await apiService.getCurrentUser();
-        setUser(userResponse as User);
-      } catch (loginError) {
-        if (loginError instanceof Error) {
-          console.error('Login after signup failed:', loginError);
-          // If login fails but signup succeeded, we'll still return success
-          // but indicate that manual login is needed
-          return {
-            success: true,
-            message: 'Account created successfully. Please log in manually.',
-            needsManualLogin: true
-          };
-        }
-        throw loginError;
-      }
+      const response = await apiService.signup(userData);
+      // Handle successful signup
+      setUser(response);
+      return response;
     } catch (error) {
-      console.error('Signup error:', error);
-      if (error instanceof Error) {
-        throw error;
+      console.error('AuthContext signup error:', error);
+      // More specific error handling based on error type/status
+      if (error instanceof ApiError && error.status === 500) {
+        throw new Error('Server error. Please try again later or contact support.');
+      } else {
+        throw error; // Pass other errors up
       }
-      throw new Error('An unexpected error occurred during signup');
     } finally {
       setIsLoading(false);
     }
