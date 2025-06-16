@@ -22,6 +22,12 @@ export interface Property {
   vacancyRate: number;
 }
 
+export interface ApiResponse<T> {
+  data: T;
+  message?: string;
+  detail?: string;
+}
+
 export interface Unit {
   id: string;
   propertyId: string;

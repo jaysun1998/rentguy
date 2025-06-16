@@ -1,4 +1,4 @@
-import { User, Property } from '../types/index';
+import { User, Property, ApiResponse, Tenant, Lease } from '../types/index';
 
 // Determine the base URL based on the environment
 const getApiBaseUrl = () => {
@@ -30,12 +30,12 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-export interface ApiResponse<T> {
-  data: T;
-  message?: string;
+interface ApiError {
+  status: number;
+  details?: any;
 }
 
-export class ApiError extends Error {
+class ApiError extends Error {
   status: number;
   details?: any;
   
@@ -241,7 +241,7 @@ class ApiService {
     }
   }
 
-  async getProperty(id: string): Promise<Property> {
+  async getProperty(id: string): Promise<Property | null> {
     try {
       const response = await fetch(`${this.baseUrl}/properties/${id}`, {
         headers: {
@@ -249,23 +249,27 @@ class ApiService {
           Authorization: `Bearer ${this.token}`,
         },
       });
-      const data = await response.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({ data: null })) as ApiResponse<Property>;
 
       if (!response.ok) {
         throw new ApiError(
-          data.message || data.detail || `Failed to fetch property. Status: ${response.status}`,
+          data.message || data.detail || `Failed to fetch property with id ${id}`,
           response.status,
           data
         );
       }
 
-      return data.property;
-    } catch (error) {
+      return data.data || null;
+    } catch (error: any) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
-        error instanceof Error ? error.message : `Failed to fetch property with id ${id}`,
+        error.message || `Failed to fetch property with id ${id}`,
+        500
+      );
+    }
+  }
 
-  async createProperty(propertyData: Property): Promise<Property> {
+  async createProperty(propertyData: Property): Promise<Property | null> {
     try {
       const response = await fetch(`${this.baseUrl}/properties`, {
         method: 'POST',
@@ -275,7 +279,7 @@ class ApiService {
         },
         body: JSON.stringify(propertyData),
       });
-      const data = await response.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({ data: null })) as ApiResponse<Property>;
 
       if (!response.ok) {
         throw new ApiError(
@@ -285,11 +289,11 @@ class ApiService {
         );
       }
 
-      return data.property;
-    } catch (error) {
+      return data.data || null;
+    } catch (error: any) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
-        error instanceof Error ? error.message : 'Failed to create property',
+        error.message || `Failed to create property`,
         500
       );
     }
@@ -420,6 +424,7 @@ class ApiService {
           Authorization: `Bearer ${this.token}`,
         },
       });
+      const data = await response.json().catch(() => ({ data: null })) as ApiResponse<void>;
 
       if (!response.ok) {
         throw new ApiError(
@@ -438,7 +443,7 @@ class ApiService {
   }
 
   // Tenants endpoints
-  async getTenants(): Promise<any[]> {
+  async getTenants(): Promise<Tenant[]> {
     try {
       const response = await fetch(`${this.baseUrl}/tenants`, {
         headers: {
@@ -446,7 +451,7 @@ class ApiService {
           Authorization: `Bearer ${this.token}`,
         },
       });
-      const data = await response.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({ data: [] })) as ApiResponse<Tenant[]>;
 
       if (!response.ok) {
         throw new ApiError(
@@ -456,7 +461,7 @@ class ApiService {
         );
       }
 
-      return data.tenants;
+      return data.data || [];
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
@@ -563,6 +568,7 @@ class ApiService {
           Authorization: `Bearer ${this.token}`,
         },
       });
+      const data = await response.json().catch(() => ({ data: null })) as ApiResponse<void>;
 
       if (!response.ok) {
         throw new ApiError(
@@ -581,7 +587,7 @@ class ApiService {
   }
 
   // Leases endpoints
-  async getLeases(): Promise<any[]> {
+  async getLeases(): Promise<Lease[]> {
     try {
       const response = await fetch(`${this.baseUrl}/leases`, {
         headers: {
@@ -589,7 +595,7 @@ class ApiService {
           Authorization: `Bearer ${this.token}`,
         },
       });
-      const data = await response.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({ data: [] })) as ApiResponse<Lease[]>;
 
       if (!response.ok) {
         throw new ApiError(
@@ -599,7 +605,7 @@ class ApiService {
         );
       }
 
-      return data.leases;
+      return data.data || [];
     } catch (error) {
       if (error instanceof ApiError) throw error;
       throw new ApiError(
