@@ -34,10 +34,10 @@ export interface ApiResponse<T> {
 }
 
 export class ApiError extends Error {
-  status?: number;
+  status: number;
   details?: any;
   
-  constructor(message: string, status?: number, details?: any) {
+  constructor(message: string, status: number = 500, details?: any) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
@@ -247,19 +247,31 @@ class ApiService {
 
       if (!responseData.access_token) {
         console.error('[API] No access token in response:', responseData);
-        throw new ApiError('Invalid server response: no access token received');
+        throw new ApiError(
+          'Invalid server response: no access token received',
+          500
+        );
       }
 
       console.log('[API] Login successful, setting token');
       this.setToken(responseData.access_token);
       return responseData;
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('[API] Login error:', error);
-      if (error instanceof ApiError) throw error;
-      throw new ApiError(
-        error instanceof Error ? error.message : 'An unknown error occurred during login'
-      );
+      
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
+      if (error instanceof Error) {
+        throw new ApiError(
+          error.message || 'An unknown error occurred during login',
+          500
+        );
+      }
+
+      throw new ApiError('An unknown error occurred during login', 500);
     }
   }
 
@@ -323,18 +335,6 @@ class ApiService {
 
       console.log('[API] Signup successful');
       return data;
-    } catch (error) {
-      console.error('Signup error:', error);
-      if (error instanceof ApiError) {
-        throw error;
-      }
-      throw new ApiError(
-        error instanceof Error ? error.message : 'An unknown error occurred during signup',
-        500,
-        error instanceof Error ? { originalError: error } : undefined
-      );
-    }
-      
     } catch (error: unknown) {
       console.error('[API] Signup failed:', {
         error,
@@ -347,13 +347,17 @@ class ApiService {
         // Network errors
         if (error.message.includes('Failed to fetch')) {
           throw new ApiError(
-            'Unable to connect to the server. Please check your internet connection and try again.'
+            'Unable to connect to the server. Please check your internet connection and try again.',
+            500
           );
         }
         
         // Handle validation errors from the server
         if (error.message.includes('already exists') || error.message.includes('already registered')) {
-          throw new ApiError('This email is already registered. Please use a different email or log in.');
+          throw new ApiError(
+            'This email is already registered. Please use a different email or log in.',
+            400
+          );
         }
         
         // Re-throw ApiError as is
@@ -363,12 +367,13 @@ class ApiService {
         
         // For other errors, wrap them in ApiError
         throw new ApiError(
-          error.message || 'An unexpected error occurred during signup'
+          error.message || 'An unexpected error occurred during signup',
+          500
         );
       }
       
       // For non-Error objects
-      throw new ApiError('An unknown error occurred during signup');
+      throw new ApiError('An unknown error occurred during signup', 500);
     }
   }
 
