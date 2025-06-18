@@ -80,7 +80,7 @@ const Signup: React.FC = () => {
                 </svg>
               </div>
               <span className="ml-2 text-xl font-semibold text-neutral-900">
-                PropertyPro<span className="text-primary font-bold">Europe</span>
+                RentGuy
               </span>
             </div>
           </Link>

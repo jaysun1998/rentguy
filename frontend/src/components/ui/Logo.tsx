@@ -33,8 +33,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', iconOnly = false, inverted = f
       </div>
       {!iconOnly && (
         <span className={`ml-2 font-semibold ${sizes[size].text} ${textColorClass}`}>
-          PropertyPro
-          <span className="text-primary font-bold">Europe</span>
+          RentGuy
         </span>
       )}
     </div>

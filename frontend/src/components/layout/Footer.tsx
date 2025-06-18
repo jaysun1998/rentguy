@@ -116,7 +116,7 @@ const Footer: React.FC = () => {
         
         <div className="mt-12 pt-8 border-t border-neutral-700">
           <p className="text-sm text-neutral-400 text-center">
-            &copy; {new Date().getFullYear()} PropertyPro Europe. All rights reserved.
+            &copy; {new Date().getFullYear()} RentGuy. All rights reserved.
           </p>
         </div>
       </div>
