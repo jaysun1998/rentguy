@@ -7,6 +7,8 @@ interface SignupData {
   password: string;
   firstName: string;
   lastName: string;
+  company?: string;
+  country?: string;
 }
 
 interface AuthContextType {
@@ -40,18 +42,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await apiService.login(email, password);
+      // The login method in apiService handles the token storage
+      await apiService.login(email, password);
       
-      // Set the token in the API service
-      apiService.setToken(response.access_token);
+      // Now get the user info using the stored token
+      const userResponse = await apiService.getCurrentUser();
       
-      // Get user info
-      const userResponse = await apiService.getCurrentUser() as User;
+      if (!userResponse) {
+        throw new Error('Failed to load user data');
+      }
       
       // Store user in localStorage and state
       localStorage.setItem('user', JSON.stringify(userResponse));
       setUser(userResponse);
     } catch (error) {
+      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -66,25 +71,49 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         throw new Error('Email and password are required');
       }
       
+      console.log('Attempting to sign up with data:', JSON.stringify(userData, null, 2));
+      
       const response = await apiService.signup(userData);
+      
+      console.log('Signup successful, response:', response);
+      
       // Handle successful signup
-      setUser({
+      const userDataResponse = {
         id: response.id,
         email: response.email,
         firstName: userData.firstName || '',
         lastName: userData.lastName || '',
         company: userData.company || '',
         country: userData.country || ''
-      });
+      };
+      
+      console.log('Setting user data:', userDataResponse);
+      setUser(userDataResponse);
       return response;
-    } catch (error) {
-      console.error('AuthContext signup error:', error);
-      // More specific error handling based on error type/status
-      if (error instanceof ApiError && error.status === 500) {
-        throw new Error('Server error. Please try again later or contact support.');
-      } else {
-        throw error; // Pass other errors up
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : 'No stack trace';
+      
+      console.error('AuthContext signup error:', {
+        error,
+        errorMessage,
+        errorStack,
+        userData: {
+          email: userData.email,
+          hasFirstName: !!userData.firstName,
+          hasLastName: !!userData.lastName,
+          hasCompany: !!userData.company,
+          hasCountry: !!userData.country
+        }
+      });
+      
+      // Rethrow with a more user-friendly message
+      if (error instanceof ApiError) {
+        console.error('API Error details:', error.details);
+        throw new Error(error.message || 'Failed to create account. Please try again.');
       }
+      
+      throw new Error('Failed to create account. Please try again later.');
     } finally {
       setIsLoading(false);
     }
@@ -122,18 +151,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     </AuthContext.Provider>
   );
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      login, 
-      signup, 
-      logout 
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
 };
 
 export const useAuth = () => {

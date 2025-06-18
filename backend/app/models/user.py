@@ -1,16 +1,8 @@
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, func, Enum
-from sqlalchemy.dialects.postgresql import ENUM as PgEnum
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship
 
 from app.db.base import Base
-
-import enum
-
-class UserRole(str, enum.Enum):
-    USER = "user"
-    PROPERTY_MANAGER = "property_manager"
-    MAINTENANCE = "maintenance"
-    ADMIN = "admin"
+from app.models.enums import UserRole
 
 class User(Base):
     __tablename__ = "users"

@@ -117,6 +117,7 @@ class ApiService {
     country?: string;
   }): Promise<{ id: string; email: string }> {
     try {
+      // Convert camelCase to snake_case for backend compatibility
       const requestData = {
         email: userData.email,
         password: userData.password,
@@ -125,6 +126,8 @@ class ApiService {
         ...(userData.country && { country: userData.country }),
         ...(userData.company && { company: userData.company }),
       };
+      
+      console.log('Sending signup request with data:', JSON.stringify(requestData, null, 2));
       const response = await fetch(`${this.baseUrl}/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

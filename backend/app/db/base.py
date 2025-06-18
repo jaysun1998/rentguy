@@ -4,11 +4,7 @@ from sqlalchemy import create_engine
 from urllib.parse import urlparse
 from app.core.config import settings
 
-# Import all models to ensure they are registered with SQLAlchemy
-# This is necessary for Base.metadata.create_all() to work
-from app.models.user import User  # noqa: F401
-# Import other models as they are created
-# from app.models.property import Property  # noqa: F401
+# Models will be imported at the end of the file to avoid circular imports
 
 # Use DATABASE_URL from settings
 database_url = settings.DATABASE_URL
@@ -38,12 +34,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-# Import all models to register them with SQLAlchemy
-from app.models import *  # noqa
-
 def get_db() -> Session:
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
+# Import models here to avoid circular imports
+# This ensures all models are registered with SQLAlchemy
+from app.models import *  # noqa
