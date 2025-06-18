@@ -46,7 +46,7 @@ const About: React.FC = () => {
       name: 'Elena Rodriguez',
       role: 'Head of Operations',
       image: 'https://images.pexels.com/photos/3796217/pexels-photo-3796217.jpeg',
-      bio: 'Operations specialist focused on streamlining property management processes across Europe.'
+      bio: 'Operations specialist focused on streamlining rental management processes.'
     },
     {
       name: 'Thomas Weber',
@@ -65,10 +65,10 @@ const About: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Revolutionizing Property Management Across Europe
+              Simplifying Rental Management
             </h1>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Our mission is to simplify property management and create better living experiences through technology.
+              Our mission is to make rental management simple and efficient for everyone.
             </p>
           </div>
         </div>
@@ -94,9 +94,9 @@ const About: React.FC = () => {
         <div className="text-center mb-16">
           <h2 className="text-3xl font-bold text-neutral-900 mb-4">Our Mission</h2>
           <p className="text-lg text-neutral-600 max-w-3xl mx-auto">
-            PropertyPro Europe was founded with a clear vision: to revolutionize property management across Europe. 
+            RentGuy was founded with a clear vision: to simplify rental management. 
             We understand the unique challenges of managing properties across different countries, languages, and regulations. 
-            Our platform brings together cutting-edge technology and local expertise to create a seamless experience for property managers and tenants alike.
+            Our platform brings together cutting-edge technology to create a seamless experience for landlords and tenants alike.
           </p>
         </div>
       </div>

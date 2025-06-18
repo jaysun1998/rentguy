@@ -40,7 +40,7 @@ const Home: React.FC = () => {
               {t('landing.features.title')}
             </h2>
             <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              The complete property management solution designed for European landlords
+              The simple and efficient solution for rental property management
             </p>
           </div>
 
