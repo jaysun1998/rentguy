@@ -30,12 +30,7 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
-interface ApiError {
-  status: number;
-  details?: any;
-}
-
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   details?: any;
   
