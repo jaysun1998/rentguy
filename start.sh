@@ -53,7 +53,15 @@ done
 
 # Create database tables if they don't exist
 echo "Initializing database schema..."
-python -c "from app.db.base import Base, engine; Base.metadata.create_all(bind=engine)"
+python -c "
+try:
+    from app.db.base import Base, engine
+    Base.metadata.create_all(bind=engine)
+    print('Database schema initialized successfully')
+except Exception as e:
+    print(f'Error initializing database schema: {e}')
+    # Continue anyway, let the app handle it
+"
 
 # Start uvicorn server
 echo "Starting FastAPI application with Uvicorn..."
