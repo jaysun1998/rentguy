@@ -27,3 +27,8 @@ LICENSE
 
 # Backup files
 *.bak
+
+# Docker files (force Nixpacks)
+Dockerfile*
+docker-compose*.yml
+backend/Dockerfile*
