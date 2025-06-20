@@ -1,34 +1,26 @@
-# Simplified Dockerfile for Railway deployment
+# Ultra-minimal Dockerfile for Railway deployment
 FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Copy minimal requirements first (for better caching)
+COPY backend/requirements.minimal.txt ./requirements.txt
 
-# Copy and install Python requirements
-COPY backend/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python packages with minimal system dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    rm -rf /root/.cache/pip
 
 # Copy backend code
 COPY backend/ .
 
-# Create a simple static directory for now (no frontend build)
-RUN mkdir -p /app/static
-COPY frontend/public/* /app/static/ 2>/dev/null || true
-
-# Make startup script executable
-RUN chmod +x /app/startup.sh
-
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 # Expose port
 EXPOSE 8000
 
-# Start the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the application directly
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

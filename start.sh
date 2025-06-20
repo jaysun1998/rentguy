@@ -34,22 +34,11 @@ python -c "
 import os
 import sys
 
-database_url = os.environ.get('DATABASE_URL', 'sqlite:///./rentguy.db')
+# Force SQLite for Railway deployment
+os.environ['DATABASE_URL'] = 'sqlite:///./rentguy.db'
+database_url = 'sqlite:///./rentguy.db'
 print(f'Using database: {database_url}')
-
-if database_url.startswith('postgresql'):
-    try:
-        import psycopg2
-        conn = psycopg2.connect(database_url)
-        conn.close()
-        print('PostgreSQL connection successful!')
-    except Exception as e:
-        print(f'PostgreSQL connection failed: {e}')
-        print('App will continue with fallback configuration')
-elif database_url.startswith('sqlite'):
-    print('Using SQLite database - no connection check needed')
-else:
-    print('Unknown database type - app will handle it')
+print('Using SQLite database - no connection check needed')
 "
 
 # Initialize database schema and data

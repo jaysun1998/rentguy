@@ -6,6 +6,13 @@ from urllib.parse import urlparse
 
 try:
     from app.core.config import settings
+    # Force SQLite for Railway deployment to avoid PostgreSQL dependency issues
+    if not hasattr(settings, 'DATABASE_URL') or not settings.DATABASE_URL:
+        settings.DATABASE_URL = "sqlite:///./rentguy.db"
+    # Override PostgreSQL with SQLite for now
+    if settings.DATABASE_URL.startswith('postgresql'):
+        logging.warning("Overriding PostgreSQL with SQLite for deployment compatibility")
+        settings.DATABASE_URL = "sqlite:///./rentguy.db"
 except Exception as e:
     # Fallback configuration if settings can't be loaded
     class FallbackSettings:
