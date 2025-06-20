@@ -28,39 +28,60 @@ else
     exit 1
 fi
 
-# Wait for database to be ready
+# Check database connection (but don't fail if it's not ready)
 echo "Checking database connection..."
-MAX_RETRIES=30
-RETRY_INTERVAL=2
-
-for i in $(seq 1 $MAX_RETRIES); do
-    echo "Attempt $i of $MAX_RETRIES..."
-    
-    # Use postgres client to check if database is accepting connections
-    if python -c "import psycopg2; psycopg2.connect(\"$DATABASE_URL\")" 2>/dev/null; then
-        echo "Successfully connected to database!"
-        break
-    fi
-    
-    if [ $i -eq $MAX_RETRIES ]; then
-        echo "Could not connect to database after $MAX_RETRIES attempts. Exiting."
-        exit 1
-    fi
-    
-    echo "Database not ready yet. Waiting..."
-    sleep $RETRY_INTERVAL
-done
-
-# Create database tables if they don't exist
-echo "Initializing database schema..."
 python -c "
+import os
+import sys
+
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///./rentguy.db')
+print(f'Using database: {database_url}')
+
+if database_url.startswith('postgresql'):
+    try:
+        import psycopg2
+        conn = psycopg2.connect(database_url)
+        conn.close()
+        print('PostgreSQL connection successful!')
+    except Exception as e:
+        print(f'PostgreSQL connection failed: {e}')
+        print('App will continue with fallback configuration')
+elif database_url.startswith('sqlite'):
+    print('Using SQLite database - no connection check needed')
+else:
+    print('Unknown database type - app will handle it')
+"
+
+# Initialize database schema and data
+echo "Initializing database..."
+python -c "
+import os
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 try:
+    logger.info('Starting database initialization...')
+    
+    # Import database components
     from app.db.base import Base, engine
+    from app.startup import init_db
+    
+    logger.info('Creating database tables...')
     Base.metadata.create_all(bind=engine)
-    print('Database schema initialized successfully')
+    logger.info('Database tables created successfully')
+    
+    logger.info('Initializing database data...')
+    init_db()
+    logger.info('Database initialization completed successfully')
+    
 except Exception as e:
-    print(f'Error initializing database schema: {e}')
-    # Continue anyway, let the app handle it
+    logger.error(f'Database initialization error: {e}')
+    logger.info('Continuing startup anyway - health endpoint will show status')
+
+print('Database initialization phase complete')
 "
 
 # Start uvicorn server
