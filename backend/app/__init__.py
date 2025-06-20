@@ -45,26 +45,3 @@ logging.getLogger('sqlalchemy.pool').setLevel(logging.WARNING)
 # Package metadata
 __version__ = "0.1.0"
 __all__ = ["settings"]
-
-# Initialize database on import
-from app.db import init_db  # noqa: E402
-
-try:
-    init_db()
-    logging.info("Database initialization completed")
-except Exception as e:
-    logging.error(f"Error initializing database: {e}")
-    raise
-
-# Import API router after database initialization
-from app.api.api_v1.api import api_router  # noqa: E402
-
-# Add API router to FastAPI app
-from fastapi import FastAPI  # noqa: E402
-
-app = FastAPI(
-    title="RentGuy API",
-    description="Property Management System API",
-    version=__version__
-)
-app.include_router(api_router, prefix=settings.API_V1_STR)

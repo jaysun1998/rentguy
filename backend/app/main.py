@@ -81,10 +81,12 @@ async def health_check():
     """
     Health check endpoint to verify the API is running.
     """
+    db = None
     try:
         # Check database connection
         db = SessionLocal()
         db.execute(text("SELECT 1"))
+        db.commit()
         return {
             "status": "healthy",
             "database": "connected",
@@ -94,10 +96,23 @@ async def health_check():
         logger.error(f"Health check failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Service unavailable. Database connection error."
+            detail=f"Service unavailable. Database connection error: {str(e)}"
         )
     finally:
-        db.close()
+        if db:
+            db.close()
+
+# Simple health check endpoint (for debugging)
+@app.get("/health")
+async def simple_health_check():
+    """
+    Simple health check endpoint without database check.
+    """
+    return {
+        "status": "healthy",
+        "message": "RentGuy API is running",
+        "version": settings.VERSION
+    }
 
 # API Root endpoint
 @app.get("/api")
