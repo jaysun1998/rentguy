@@ -1,16 +1,14 @@
 # Railway deployment configuration for RentGuy application
-# Following Semantic Seed Venture Studio Coding Standards V2.0
+# Emergency deployment - minimal configuration
 
 [build]
 builder = "nixpacks"
-buildCommand = "echo 'Building both frontend and backend services' && chmod +x start.sh"
 
 [deploy]
-startCommand = "./start.sh"
-healthcheckPath = "/api/v1/health"
-healthcheckTimeout = 60
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 5
+startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "always"
 
 [env]
 # Database configuration

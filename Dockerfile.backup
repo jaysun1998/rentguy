@@ -1,0 +1,36 @@
+# Emergency Railway deployment - absolute minimal
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Copy only essential files
+COPY backend/app app/
+
+# Create ultra-minimal requirements 
+RUN echo "fastapi==0.104.1" > requirements.txt && \
+    echo "uvicorn==0.24.0" >> requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt && \
+    rm requirements.txt
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Create minimal main.py without auth/database
+RUN cat > simple_main.py << 'EOF'
+from fastapi import FastAPI
+
+app = FastAPI(title="RentGuy API - Emergency Deploy")
+
+@app.get("/")
+def read_root():
+    return {"message": "RentGuy API Emergency Deploy", "status": "running"}
+
+@app.get("/health")
+@app.get("/api/v1/health")
+def health_check():
+    return {"status": "healthy", "service": "running"}
+EOF
+
+# Start the minimal application
+CMD ["uvicorn", "simple_main:app", "--host", "0.0.0.0", "--port", "8000"]
