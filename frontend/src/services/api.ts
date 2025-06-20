@@ -15,7 +15,7 @@ const getApiBaseUrl = () => {
   if (isWebContainer) {
     // For web containers, we need to use the full URL to the backend
     // This should be set in the environment variables of your web container
-    return 'https://your-deployed-backend-url.com/api/v1';
+    return 'https://rentguy-production.up.railway.app/api/v1';
   }
   
   // 3. For local development with Vite proxy
@@ -25,7 +25,7 @@ const getApiBaseUrl = () => {
   }
   
   // 4. Default production URL (should be overridden by VITE_API_URL in production)
-  return '/api/v1';
+  return 'https://rentguy-production.up.railway.app/api/v1';
 };
 
 const API_BASE_URL = getApiBaseUrl();
