@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime, timedelta
 
-from app.db.base import Base
+from app.db.base_class import Base
 
 class InvoiceStatus(str, enum.Enum):
     PENDING = "pending"

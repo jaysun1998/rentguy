@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Date, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 import enum
 
-from app.db.base import Base
+from app.db.base_class import Base
 
 class ScreeningStatus(str, enum.Enum):
     NOT_SUBMITTED = "not_submitted"

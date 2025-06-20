@@ -10,11 +10,12 @@ from app.models.tenant import Tenant, ScreeningResult
 from app.models.lease import Lease
 from app.models.invoice import Invoice, VATEntry
 from app.models.maintenance import MaintenanceRequest
+from app.models.bank_connection import BankConnection, BankAccount, BankConnectionStatus
+from app.models.transaction import Transaction, TransactionType, TransactionStatus
 
 __all__ = [
     "UserRole",
     "User",
-    "UserRole", 
     "Property",
     "Unit",
     "Tenant",
@@ -22,5 +23,11 @@ __all__ = [
     "Lease", 
     "Invoice",
     "VATEntry",
-    "MaintenanceRequest"
+    "MaintenanceRequest",
+    "BankConnection",
+    "BankAccount", 
+    "BankConnectionStatus",
+    "Transaction",
+    "TransactionType",
+    "TransactionStatus"
 ]

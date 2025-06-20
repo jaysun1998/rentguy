@@ -1,5 +1,5 @@
-from app.schemas.token import Token, TokenPayload
-from app.schemas.user import User, UserCreate, UserUpdate, UserInDB
+from app.schemas.token import Token, TokenPayload, TokenData
+from app.schemas.user import User, UserCreate, UserUpdate, UserInDB, UserRole
 from app.schemas.property import Property, PropertyCreate, PropertyUpdate, PropertyInDB, PropertyWithStats
 from app.schemas.unit import Unit, UnitCreate, UnitUpdate, UnitInDB
 from app.schemas.tenant import Tenant, TenantCreate, TenantUpdate, TenantInDB, TenantWithScreening, ScreeningResult, ScreeningResultCreate, ScreeningResultUpdate
@@ -8,8 +8,8 @@ from app.schemas.invoice import Invoice, InvoiceCreate, InvoiceUpdate, InvoiceIn
 from app.schemas.maintenance import MaintenanceRequest, MaintenanceRequestCreate, MaintenanceRequestUpdate, MaintenanceRequestInDB, MaintenanceRequestAssign, MaintenanceRequestResolve
 
 __all__ = [
-    "Token", "TokenPayload", 
-    "User", "UserCreate", "UserUpdate", "UserInDB",
+    "Token", "TokenPayload", "TokenData",
+    "User", "UserCreate", "UserUpdate", "UserInDB", "UserRole",
     "Property", "PropertyCreate", "PropertyUpdate", "PropertyInDB", "PropertyWithStats",
     "Unit", "UnitCreate", "UnitUpdate", "UnitInDB",
     "Tenant", "TenantCreate", "TenantUpdate", "TenantInDB", "TenantWithScreening",

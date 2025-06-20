@@ -28,7 +28,7 @@ class TestAuthentication:
         
         # When: Signup request is made
         response = client.post(
-            f"{settings.API_V1_STR}/auth/signup",
+            "/api/v1/auth/signup",
             json=user_data
         )
         
@@ -61,7 +61,7 @@ class TestAuthentication:
         
         # When: Another signup attempt is made with the same email
         response = client.post(
-            f"{settings.API_V1_STR}/auth/signup",
+            "/api/v1/auth/signup",
             json=user_data
         )
         
@@ -81,7 +81,7 @@ class TestAuthentication:
         
         # When: Signup request is made
         response = client.post(
-            f"{settings.API_V1_STR}/auth/signup",
+            "/api/v1/auth/signup",
             json=user_data
         )
         
@@ -106,7 +106,7 @@ class TestAuthentication:
             "username": user_data["email"],
             "password": user_data["password"]
         }
-        response = client.post(f"{settings.API_V1_STR}/auth/login/access-token", data=login_data)
+        response = client.post("/api/v1/auth/login/access-token", data=login_data)
         
         # Then: Login is successful with token
         assert response.status_code == status.HTTP_200_OK
@@ -122,7 +122,7 @@ class TestAuthentication:
         }
         
         # When: Login request is made
-        response = client.post(f"{settings.API_V1_STR}/auth/login/access-token", data=login_data)
+        response = client.post("/api/v1/auth/login/access-token", data=login_data)
         
         # Then: Login is rejected
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -149,12 +149,12 @@ class TestUserEndpoints:
             "username": user_data["email"],
             "password": user_data["password"]
         }
-        tokens = client.post(f"{settings.API_V1_STR}/auth/login/access-token", data=login_data)
+        tokens = client.post("/api/v1/auth/login/access-token", data=login_data)
         token = tokens.json()["access_token"]
         
         # When: User requests their profile
         response = client.get(
-            f"{settings.API_V1_STR}/users/me",
+            "/api/v1/auth/me",
             headers={"Authorization": f"Bearer {token}"}
         )
         
@@ -170,7 +170,7 @@ class TestUserEndpoints:
         # Given: No authentication
         
         # When: User requests the me endpoint without auth
-        response = client.get(f"{settings.API_V1_STR}/users/me")
+        response = client.get("/api/v1/auth/me")
         
         # Then: Request is rejected
         assert response.status_code == status.HTTP_401_UNAUTHORIZED

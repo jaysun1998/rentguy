@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
 import enum
 
-from app.db.base import Base
+from app.db.base_class import Base
 
 class MaintenanceStatus(str, enum.Enum):
     OPEN = "open"

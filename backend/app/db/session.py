@@ -1,10 +1,8 @@
 import logging
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.pool import QueuePool
 from urllib.parse import urlparse
-from contextlib import contextmanager
 
 from app.core.config import settings
 
@@ -42,11 +40,9 @@ SessionLocal = scoped_session(
     sessionmaker(autocommit=False, autoflush=False, bind=engine)
 )
 
-# Base class for models
-Base = declarative_base()
-Base.query = SessionLocal.query_property()
+# Import Base from base_class to avoid duplicates
+from app.db.base_class import Base
 
-@contextmanager
 def get_db():
     """
     Dependency function that yields database sessions.
@@ -55,7 +51,6 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
-        db.commit()
     except Exception as e:
         db.rollback()
         logger.error(f"Database error: {e}")

@@ -3,7 +3,6 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 
 from app.main import app
 from app.db.base import get_db
@@ -20,10 +19,7 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Import all models to ensure they're registered with the Base metadata
-from app.models.user import User
-
-# Create the tables in the test database
-Base.metadata.create_all(bind=engine)
+from app.models import *  # This imports all models
 
 # Override the get_db dependency
 def override_get_db():
@@ -44,8 +40,9 @@ def test_db():
         yield db
     finally:
         db.close()
-        # Clean up after each test
+        # Clean up after each test - drop and recreate tables
         Base.metadata.drop_all(bind=engine)
+        Base.metadata.create_all(bind=engine)
 
 @pytest.fixture(scope="function")
 def client():
@@ -75,7 +72,7 @@ def auth_client(client, test_db):
         "username": user_data["email"],
         "password": user_data["password"]
     }
-    response = client.post(f"{settings.API_V1_STR}/auth/login/access-token", data=login_data)
+    response = client.post("/api/v1/auth/login/access-token", data=login_data)
     assert response.status_code == 200, f"Login failed: {response.json()}"
     token = response.json()["access_token"]
     

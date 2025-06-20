@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship
 
-from app.db.base import Base
+from app.db.base_class import Base
 from app.models.enums import UserRole
 
 class User(Base):
@@ -23,6 +23,8 @@ class User(Base):
     
     # Relationships (using string reference to avoid circular imports)
     properties = relationship("Property", back_populates="owner")
+    bank_connections = relationship("BankConnection", back_populates="user")
+    transactions = relationship("Transaction", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.email} (ID: {self.id})>"
@@ -35,7 +37,7 @@ class User(Base):
     @property
     def is_admin(self) -> bool:
         """Check if the user has admin role."""
-        return self.role == UserRole.ADMIN or self.is_superuser
+        return self.role == "admin" or self.is_superuser
     
     def set_password(self, password: str):
         """

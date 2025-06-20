@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, Date, DateTime, ForeignKe
 from sqlalchemy.orm import relationship
 import enum
 
-from app.db.base import Base
+from app.db.base_class import Base
 
 class LeaseStatus(str, enum.Enum):
     PENDING_SIGNATURE = "pending_signature"

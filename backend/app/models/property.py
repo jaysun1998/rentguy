@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM as PgEnum
 import enum
 
-from app.db.base import Base
+from app.db.base_class import Base
 
 class PropertyType(str, enum.Enum):
     RESIDENTIAL = "residential"
