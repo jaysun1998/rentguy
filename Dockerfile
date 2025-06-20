@@ -1,40 +1,34 @@
-# Stage 1: Build the frontend
-FROM node:18-alpine AS frontend-build
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm install
-COPY frontend/ ./
-RUN npm run build
+# Simplified Dockerfile for Railway deployment
+FROM python:3.9-slim
 
-# Stage 2: Build the backend
-FROM python:3.9-slim AS backend
 WORKDIR /app
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
-    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Copy and install Python requirements
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend code and startup script
+# Copy backend code
 COPY backend/ .
-COPY --from=frontend-build /app/frontend/dist /app/static
 
-# Make the startup script executable
+# Create a simple static directory for now (no frontend build)
+RUN mkdir -p /app/static
+COPY frontend/public/* /app/static/ 2>/dev/null || true
+
+# Make startup script executable
 RUN chmod +x /app/startup.sh
+
+# Set environment variables
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
 
 # Expose port
 EXPOSE 8000
 
-# Command to run the application
-CMD ["/app/startup.sh"]
+# Start the application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

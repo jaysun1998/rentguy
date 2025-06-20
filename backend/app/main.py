@@ -54,9 +54,23 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 static_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "static")
 if os.path.exists(static_directory):
     logger.info(f"Mounting static files from: {static_directory}")
-    app.mount("/", StaticFiles(directory=static_directory, html=True), name="static")
+    try:
+        app.mount("/", StaticFiles(directory=static_directory, html=True), name="static")
+    except Exception as e:
+        logger.warning(f"Could not mount static files: {e}")
 else:
     logger.warning(f"Static directory not found at {static_directory}. Frontend will not be served.")
+
+# Add a simple frontend fallback route
+@app.get("/", include_in_schema=False)
+async def read_frontend():
+    """Serve a simple frontend or redirect to API docs"""
+    return {
+        "message": "RentGuy API is running!",
+        "api_docs": "/api/v1/docs",
+        "health_check": "/api/v1/health",
+        "version": settings.VERSION
+    }
 
 # Initialize database and create first superuser on startup
 @app.on_event("startup")
