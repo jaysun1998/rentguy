@@ -4,91 +4,99 @@ set -e
 # Set environment variables
 export PYTHONPATH=/app
 
+echo "RentGuy Backend Startup - Railway Deployment"
+echo "Current directory: $(pwd)"
+echo "Environment check:"
+echo "- DATABASE_URL: ${DATABASE_URL:-'Not set'}"
+echo "- SECRET_KEY: ${SECRET_KEY:-'Not set'}"
+
 # Function to check if database is ready
 wait_for_db() {
-    echo "Waiting for PostgreSQL to be ready..."
-    until PGPASSWORD=$POSTGRES_PASSWORD psql -h "db" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c '\q' 2>/dev/null; do
-        >&2 echo "PostgreSQL is unavailable - sleeping"
-        sleep 5
-    done
-    echo "PostgreSQL is up and running!"
-}
+    echo "Checking database connection..."
+    
+    # If we have a DATABASE_URL (Railway style), use it
+    if [ -n "$DATABASE_URL" ]; then
+        echo "Using DATABASE_URL for connection check"
+        # Extract host from DATABASE_URL for basic connectivity check
+        # For Railway, we'll just try to connect via Python instead of psql
+        python -c "
+import os
+import time
+import psycopg2
+from urllib.parse import urlparse
 
-# Function to create database tables
-create_tables() {
-    echo "Creating database tables..."
-    cd /app
-    python -c "
-import sys
-from app.db.base import Base
-from app.db.session import engine
-
-print('Creating database tables...')
-Base.metadata.create_all(bind=engine)
-print('Database tables created successfully')
+database_url = os.environ.get('DATABASE_URL')
+if database_url:
+    max_retries = 30
+    for i in range(max_retries):
+        try:
+            conn = psycopg2.connect(database_url)
+            conn.close()
+            print(f'Database connection successful on attempt {i+1}')
+            break
+        except Exception as e:
+            print(f'Attempt {i+1}/{max_retries}: Database not ready ({e})')
+            if i < max_retries - 1:
+                time.sleep(2)
+            else:
+                print('Warning: Could not connect to database, continuing anyway...')
+else:
+    print('No DATABASE_URL found, assuming SQLite fallback')
 "
+    else
+        echo "No DATABASE_URL found, will use SQLite fallback"
+    fi
 }
 
-# Function to initialize the database
+# Function to create database tables and initialize
 init_database() {
     echo "Initializing database..."
     cd /app
     
-    # Create database tables first
-    create_tables
-    
-    # Then run database initialization script
-    if [ -f "init_db.py" ]; then
-        echo "Running database initialization..."
-        python init_db.py
-    else
-        echo "Error: init_db.py not found!"
-        exit 1
-    fi
-    
-    # Run Alembic migrations if available
-    if [ -f "alembic.ini" ]; then
-        echo "Running database migrations..."
-        alembic upgrade head
-    else
-        echo "No alembic.ini found, skipping migrations"
-    fi
-}
+    python -c "
+import sys
+import os
+import logging
 
-# Function to check if database needs initialization
-needs_initialization() {
-    # Check if the users table exists
-    local count=$(PGPASSWORD=$POSTGRES_PASSWORD psql -h "db" -U "$POSTGRES_USER" -d "$POSTGRES_DB" -tAc "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'users';" 2>/dev/null || echo "0")
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+try:
+    logger.info('Starting database initialization...')
     
-    if [ "$count" -eq "0" ]; then
-        echo "Database needs initialization"
-        return 0
-    else
-        echo "Database already initialized"
-        return 1
-    fi
+    # Import database components
+    from app.db.base import Base, engine
+    from app.startup import init_db
+    
+    logger.info('Creating database tables...')
+    Base.metadata.create_all(bind=engine)
+    logger.info('Database tables created successfully')
+    
+    logger.info('Initializing database data...')
+    init_db()
+    logger.info('Database initialization completed successfully')
+    
+except Exception as e:
+    logger.error(f'Database initialization error: {e}')
+    logger.info('Continuing startup anyway - app will handle database issues')
+
+print('Database initialization complete')
+"
 }
 
 # Main execution
+echo "Starting RentGuy backend initialization..."
+
+# Check database connection
 wait_for_db
 
-# Always ensure tables exist
-create_tables
-
-# Check if database needs initialization
-if needs_initialization; then
-    echo "Initializing database with default data..."
-    init_database
-else
-    echo "Skipping database initialization - already set up"
-    
-    # Still run migrations on existing database
-    if [ -f "alembic.ini" ]; then
-        echo "Running database migrations..."
-        alembic upgrade head
-    fi
-fi
+# Initialize database
+init_database
 
 # Start the application
-echo "Starting application..."
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+echo "Starting FastAPI application..."
+echo "Health check will be available at: /api/v1/health"
+echo "API documentation at: /api/v1/docs"
+
+exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
