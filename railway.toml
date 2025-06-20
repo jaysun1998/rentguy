@@ -1,11 +1,5 @@
-# Railway deployment configuration for RentGuy application
-# Emergency deployment - minimal configuration
-
-[build]
-builder = "nixpacks"
-
 [deploy]
-startCommand = "uvicorn main:app --host 0.0.0.0 --port $PORT"
+startCommand = "python -m uvicorn app:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "always"
