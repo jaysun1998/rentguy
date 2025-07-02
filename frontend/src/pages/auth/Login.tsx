@@ -9,6 +9,13 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, googleLogin, isLoading } = useAuth();
   
+  // Debug environment variables
+  React.useEffect(() => {
+    console.log('Login component mounted');
+    console.log('Google Client ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID);
+    console.log('API URL:', import.meta.env.VITE_API_URL);
+  }, []);
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
