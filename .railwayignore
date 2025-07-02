@@ -1,55 +1,10 @@
-# Exclude entire frontend to deploy only Python API
-frontend/
 node_modules/
-package*.json
-*.js
-*.ts
-*.tsx
-*.jsx
-vite.config.*
-vitest.config.*
-tsconfig.*
-tailwind.config.*
-postcss.config.*
-eslint.config.*
-
-# Development files
+.git/
+venv/
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-.env.example
+*.pyc
+dist/
+.env
+.env.local
 *.log
 .DS_Store
-
-# Git related
-.git/
-.gitignore
-
-# Local development configurations
-.vscode/
-.idea/
-
-# Documentation
-*.md
-backlog.*
-datamodel.*
-prd.*
-sprintplan.*
-RULES.md
-LICENSE
-
-# Backup files
-*.bak
-
-# Docker files (force Nixpacks)
-Dockerfile*
-docker-compose*.yml
-backend/Dockerfile*
-
-# Backend-only deployment - exclude everything else
-backend/
-nginx/
-start.sh
-startup.sh
