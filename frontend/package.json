@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "vite build",
+    "build": "vite build --mode production",
+    "build:ci": "vite build --mode production --logLevel warn",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
