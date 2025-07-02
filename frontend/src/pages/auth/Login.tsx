@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import GoogleLoginButton from '../../components/auth/GoogleLoginButton';
 
 const Login: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
+  const { login, googleLogin, isLoading } = useAuth();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,6 +27,26 @@ const Login: React.FC = () => {
         setError('An unexpected error occurred. Please try again.');
       }
     }
+  };
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setError('');
+    
+    try {
+      await googleLogin(credential);
+      navigate('/dashboard');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Google login failed. Please try again.');
+      }
+    }
+  };
+
+  const handleGoogleFailure = (error: any) => {
+    console.error('Google login failed:', error);
+    setError('Google login failed. Please try again.');
   };
   
   return (
@@ -111,6 +132,25 @@ const Login: React.FC = () => {
               )}
             </button>
           </form>
+          
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <GoogleLoginButton
+                onSuccess={handleGoogleSuccess}
+                onFailure={handleGoogleFailure}
+                disabled={isLoading}
+              />
+            </div>
+          </div>
         </div>
         
         <p className="text-center mt-6 text-neutral-600">

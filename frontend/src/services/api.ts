@@ -179,6 +179,55 @@ class ApiService {
     }
   }
 
+  async googleLogin(googleToken: string): Promise<{ id: string; email: string; access_token: string }> {
+    try {
+      console.log('[API] Attempting Google login with token');
+      
+      const response = await fetch(`${this.baseUrl}/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          token: googleToken,
+          provider: 'google'
+        }),
+      });
+
+      const responseData = await response.json().catch(() => ({}));
+      
+      if (!response.ok) {
+        console.error('[API] Google login failed:', {
+          status: response.status,
+          error: responseData,
+        });
+        
+        throw new ApiError(
+          responseData.detail || 
+          responseData.message || 
+          'Google login failed. Please try again.',
+          response.status
+        );
+      }
+
+      if (!responseData.access_token) {
+        console.error('[API] No access token in Google login response:', responseData);
+        throw new ApiError('Invalid server response: no access token received');
+      }
+
+      console.log('[API] Google login successful, setting token');
+      this.setToken(responseData.access_token);
+      return responseData;
+      
+    } catch (error) {
+      console.error('[API] Google login error:', error);
+      if (error instanceof ApiError) throw error;
+      throw new ApiError(
+        error instanceof Error ? error.message : 'An unknown error occurred during Google login'
+      );
+    }
+  }
+
   async getCurrentUser(): Promise<User | null> {
     try {
       const response = await fetch(`${this.baseUrl}/auth/me`, {

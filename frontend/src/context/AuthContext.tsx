@@ -16,6 +16,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (googleToken: string) => Promise<void>;
   signup: (userData: SignupData) => Promise<{ success: boolean; message?: string; needsManualLogin?: boolean } | { id: string; email: string }>;
   logout: () => void;
   forgotPassword: (email: string) => Promise<void>;
@@ -125,6 +126,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
+  const googleLogin = async (googleToken: string) => {
+    setIsLoading(true);
+    try {
+      // The googleLogin method in apiService handles the token storage
+      await apiService.googleLogin(googleToken);
+      
+      // Now get the user info using the stored token
+      const userResponse = await apiService.getCurrentUser();
+      
+      if (!userResponse) {
+        throw new Error('Failed to load user data after Google login');
+      }
+      
+      // Store user in localStorage and state
+      localStorage.setItem('user', JSON.stringify(userResponse));
+      setUser(userResponse);
+    } catch (error) {
+      console.error('Google login error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const forgotPassword = async (email: string) => {
     setIsLoading(true);
     try {
@@ -142,7 +167,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       user, 
       isAuthenticated: !!user, 
       isLoading, 
-      login, 
+      login,
+      googleLogin, 
       signup, 
       logout,
       forgotPassword 

@@ -1,15 +1,21 @@
 from datetime import timedelta
 from typing import Any
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
 
 from app import models, schemas, services
 from app.api import deps
 from app.core import security
 from app.core.config import settings
 from app.db.base import get_db
+from app.schemas.google_auth import GoogleAuthRequest, GoogleAuthResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -83,6 +89,92 @@ async def create_user_signup(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=detail,
+        )
+
+@router.post("/google", response_model=GoogleAuthResponse)
+async def google_auth(
+    *,
+    db: Session = Depends(get_db),
+    google_auth_data: GoogleAuthRequest,
+) -> Any:
+    """
+    Authenticate user with Google OAuth token
+    """
+    try:
+        # Verify the Google token
+        CLIENT_ID = getattr(settings, 'GOOGLE_CLIENT_ID', None)
+        if not CLIENT_ID:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Google authentication not configured"
+            )
+            
+        idinfo = id_token.verify_oauth2_token(
+            google_auth_data.token, 
+            google_requests.Request(), 
+            CLIENT_ID
+        )
+
+        # Extract user information from the token
+        email = idinfo.get('email')
+        first_name = idinfo.get('given_name', '')
+        last_name = idinfo.get('family_name', '')
+        google_id = idinfo.get('sub')
+
+        if not email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to get email from Google token"
+            )
+
+        # Check if user exists
+        user = services.user.get_by_email(db, email=email)
+        
+        if not user:
+            # Create new user if doesn't exist
+            user_in = schemas.UserCreate(
+                email=email,
+                password="google_oauth_user",  # Placeholder password for Google users
+                first_name=first_name,
+                last_name=last_name,
+            )
+            user = services.user.create_user(db, user_in=user_in)
+            logger.info(f"Created new user from Google auth: {email}")
+
+        if not services.user.is_active(user):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Inactive user"
+            )
+
+        # Create access token
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = security.create_access_token(
+            subject=user.id,
+            expires_delta=access_token_expires,
+            email=user.email,
+            roles=[user.role],
+        )
+
+        return GoogleAuthResponse(
+            access_token=access_token,
+            token_type="bearer",
+            user_id=str(user.id),
+            email=user.email
+        )
+
+    except ValueError as e:
+        # Invalid token
+        logger.error(f"Invalid Google token: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid Google token"
+        )
+    except Exception as e:
+        logger.error(f"Google authentication error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Google authentication failed"
         )
 
 @router.get("/me", response_model=schemas.User)
