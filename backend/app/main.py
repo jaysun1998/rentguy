@@ -50,27 +50,45 @@ app.add_middleware(
 # Include API router
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# Check if static directory exists (for frontend files)
-static_directory = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "static")
-if os.path.exists(static_directory):
-    logger.info(f"Mounting static files from: {static_directory}")
-    try:
-        app.mount("/", StaticFiles(directory=static_directory, html=True), name="static")
-    except Exception as e:
-        logger.warning(f"Could not mount static files: {e}")
-else:
-    logger.warning(f"Static directory not found at {static_directory}. Frontend will not be served.")
+# Configure static file serving for frontend
+def setup_static_files():
+    """Setup static file serving with proper MIME types"""
+    # Try multiple possible static file locations
+    possible_static_dirs = [
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "static"),
+        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "frontend", "dist"),
+        "/app/static",
+        "/app/frontend/dist"
+    ]
+    
+    static_dir = None
+    for directory in possible_static_dirs:
+        if os.path.exists(directory):
+            static_dir = directory
+            logger.info(f"Found static files at: {directory}")
+            break
+    
+    if static_dir:
+        try:
+            # Mount assets directory with proper MIME type handling
+            assets_dir = os.path.join(static_dir, "assets")
+            if os.path.exists(assets_dir):
+                app.mount("/assets", StaticFiles(directory=assets_dir, check_dir=False), name="assets")
+                logger.info(f"Mounted assets from: {assets_dir}")
+            
+            # Mount other static files (logos, favicon, etc.)
+            app.mount("/static", StaticFiles(directory=static_dir, check_dir=False), name="static")
+            logger.info(f"Mounted static files from: {static_dir}")
+            return static_dir
+        except Exception as e:
+            logger.warning(f"Could not mount static files from {static_dir}: {e}")
+    
+    logger.warning("No static directory found. Frontend will not be served.")
+    return None
 
-# Add a simple frontend fallback route
-@app.get("/", include_in_schema=False)
-async def read_frontend():
-    """Serve a simple frontend or redirect to API docs"""
-    return {
-        "message": "RentGuy API is running!",
-        "api_docs": "/api/v1/docs",
-        "health_check": "/api/v1/health",
-        "version": settings.VERSION
-    }
+# Setup static files
+STATIC_DIR = setup_static_files()
+
 
 # Initialize database and create first superuser on startup
 @app.on_event("startup")
@@ -155,3 +173,60 @@ async def api_root():
         "version": settings.VERSION,
         "docs": "/api/v1/docs"
     }
+
+# Custom route to serve JavaScript files with correct MIME type
+@app.get("/assets/{file_path:path}")
+async def serve_assets(file_path: str):
+    """Serve asset files with proper MIME types"""
+    if not STATIC_DIR:
+        raise HTTPException(status_code=404, detail="Static files not configured")
+    
+    assets_dir = os.path.join(STATIC_DIR, "assets")
+    file_full_path = os.path.join(assets_dir, file_path)
+    
+    if not os.path.exists(file_full_path):
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    # Determine MIME type based on file extension
+    if file_path.endswith('.js'):
+        media_type = "application/javascript"
+    elif file_path.endswith('.css'):
+        media_type = "text/css"
+    elif file_path.endswith('.map'):
+        media_type = "application/json"
+    else:
+        media_type = None
+    
+    return FileResponse(file_full_path, media_type=media_type)
+
+# Frontend fallback route - serve index.html for SPA routing
+@app.get("/", include_in_schema=False)
+async def read_frontend():
+    """Serve frontend index.html or API info"""
+    if STATIC_DIR:
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file, media_type="text/html")
+    
+    # Fallback to API info if no frontend found
+    return {
+        "message": "RentGuy API is running!",
+        "api_docs": "/api/v1/docs",
+        "health_check": "/api/v1/health",
+        "version": settings.VERSION
+    }
+
+# Catch-all route for SPA routing (must be last)
+@app.get("/{full_path:path}", include_in_schema=False)
+async def catch_all(full_path: str):
+    """Catch-all route for SPA routing - serve index.html for non-API routes"""
+    # Don't intercept API routes
+    if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi"):
+        raise HTTPException(status_code=404, detail="Not found")
+    
+    if STATIC_DIR:
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file, media_type="text/html")
+    
+    raise HTTPException(status_code=404, detail="Frontend not found")
