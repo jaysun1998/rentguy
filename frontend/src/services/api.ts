@@ -7,7 +7,12 @@ const getApiBaseUrl = () => {
     return import.meta.env.VITE_API_URL;
   }
   
-  // 2. Check for web container environments (like StackBlitz, CodeSandbox, etc.)
+  // 2. For production, use same domain as frontend to avoid CORS
+  if (window.location.hostname === 'rentguy.co' || window.location.hostname === 'www.rentguy.co') {
+    return '/api/v1';
+  }
+  
+  // 3. Check for web container environments (like StackBlitz, CodeSandbox, etc.)
   const isWebContainer = window.location.hostname.includes('webcontainer.io') || 
                        window.location.hostname.includes('stackblitz.io') ||
                        window.location.hostname.includes('codesandbox.io');
@@ -18,13 +23,13 @@ const getApiBaseUrl = () => {
     return 'https://rentguy-production.up.railway.app/api/v1';
   }
   
-  // 3. For local development with Vite proxy
+  // 4. For local development with Vite proxy
   if (import.meta.env.DEV) {
     // Use relative URL which will be proxied by Vite
     return '/api';
   }
   
-  // 4. Default production URL (should be overridden by VITE_API_URL in production)
+  // 5. Default fallback URL
   return 'https://rentguy-production.up.railway.app/api/v1';
 };
 
