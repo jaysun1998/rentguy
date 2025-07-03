@@ -233,8 +233,11 @@ async def read_frontend():
 @app.get("/{full_path:path}", include_in_schema=False)
 async def catch_all(full_path: str):
     """Catch-all route for SPA routing - serve index.html for non-API routes"""
-    # Don't intercept API routes
-    if full_path.startswith("api/") or full_path.startswith("docs") or full_path.startswith("openapi"):
+    # Don't intercept API routes - check for all API path patterns
+    if (full_path.startswith("api/") or 
+        full_path.startswith("docs") or 
+        full_path.startswith("openapi") or
+        full_path.startswith(settings.API_V1_STR.lstrip('/'))):
         raise HTTPException(status_code=404, detail="Not found")
     
     if STATIC_DIR:
