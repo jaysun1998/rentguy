@@ -229,18 +229,17 @@ async def read_frontend():
         "version": settings.VERSION
     }
 
-# Catch-all route temporarily disabled for debugging
-# TODO: Re-enable once API routing is working
-# @app.get("/{full_path:path}", include_in_schema=False)
-# async def catch_all(full_path: str):
-#     """Catch-all route for SPA routing - serve index.html for non-API routes"""
-#     logger.info(f"Catch-all route called with path: {full_path}")
-#     
-#     if STATIC_DIR:
-#         index_file = os.path.join(STATIC_DIR, "index.html")
-#         if os.path.exists(index_file):
-#             logger.info(f"Serving frontend index.html for path: {full_path}")
-#             return FileResponse(index_file, media_type="text/html")
-#     
-#     logger.warning(f"No frontend found for path: {full_path}")
-#     raise HTTPException(status_code=404, detail="Frontend not found")
+# Catch-all route for SPA routing (must be last)
+@app.get("/{full_path:path}", include_in_schema=False)
+async def catch_all(full_path: str):
+    """Catch-all route for SPA routing - serve index.html for non-API routes"""
+    # Don't intercept API routes
+    if full_path.startswith("api/v1/"):
+        raise HTTPException(status_code=404, detail="API endpoint not found")
+    
+    if STATIC_DIR:
+        index_file = os.path.join(STATIC_DIR, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file, media_type="text/html")
+    
+    raise HTTPException(status_code=404, detail="Frontend not found")
