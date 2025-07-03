@@ -150,14 +150,22 @@ async def health_check():
         
     return response
 
-# Simple health check endpoint (for debugging)
+# Simple health check endpoint (for Railway)
 @app.get("/health")
 async def simple_health_check():
     """
-    Simple health check endpoint without database check.
+    Simple health check endpoint without database check for Railway.
+    """
+    return {"status": "ok"}
+
+# More detailed health check endpoint  
+@app.get("/api/health")
+async def detailed_health_check():
+    """
+    Detailed health check endpoint with system info.
     """
     return {
-        "status": "healthy",
+        "status": "healthy", 
         "message": "RentGuy API is running",
         "version": settings.VERSION
     }
