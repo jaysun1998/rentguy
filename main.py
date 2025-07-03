@@ -1,43 +1,40 @@
 """
-Emergency deployment version of RentGuy API
-Minimal FastAPI app for Railway deployment
+Entry point for Railway deployment.
+Imports the full backend application with Google OAuth support.
 """
-from fastapi import FastAPI
+import sys
 import os
 
-app = FastAPI(
-    title="RentGuy API",
-    description="Property Management System API - Emergency Deploy",
-    version="0.1.0"
-)
+# Add the current directory to Python path so backend module can be imported
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-@app.get("/")
-async def read_root():
-    return {
-        "message": "RentGuy API is running!",
-        "status": "healthy",
-        "version": "0.1.0",
-        "health_check": "/health",
-        "api_docs": "/docs"
-    }
-
-@app.get("/health")
-@app.get("/api/v1/health")
-async def health_check():
-    return {
-        "status": "healthy",
-        "service": "running",
-        "database": "sqlite_ready",
-        "version": "0.1.0"
-    }
-
-@app.get("/api")
-async def api_root():
-    return {
-        "message": "Welcome to RentGuy API",
-        "version": "0.1.0",
-        "docs": "/docs"
-    }
+try:
+    # Import the full backend app with all features
+    from backend.app.main import app
+    print("Successfully imported full backend app with Google OAuth")
+except ImportError as e:
+    print(f"Failed to import backend app: {e}")
+    # Fallback to a simple app if backend import fails
+    from fastapi import FastAPI
+    
+    app = FastAPI(
+        title="RentGuy API - Fallback",
+        description="Property Management System API - Fallback Mode",
+        version="0.1.0"
+    )
+    
+    @app.get("/")
+    async def read_root():
+        return {
+            "message": "RentGuy API is running in fallback mode!",
+            "status": "limited",
+            "version": "0.1.0",
+            "error": "Backend import failed"
+        }
+    
+    @app.get("/health")
+    async def health_check():
+        return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn
