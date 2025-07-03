@@ -22,8 +22,8 @@ FIRST_SUPERUSER_PASSWORD = "${FIRST_SUPERUSER_PASSWORD}"
 FIRST_SUPERUSER_FIRST_NAME = "${FIRST_SUPERUSER_FIRST_NAME}"
 FIRST_SUPERUSER_LAST_NAME = "${FIRST_SUPERUSER_LAST_NAME}"
 
-# Backend CORS configuration
-BACKEND_CORS_ORIGINS = '["*"]'
+# Backend CORS configuration  
+BACKEND_CORS_ORIGINS = '["https://rentguy.co", "https://www.rentguy.co", "https://rentguy-production.up.railway.app", "http://localhost:5173"]'
 
 # Python configuration
 PYTHONUNBUFFERED = "1"

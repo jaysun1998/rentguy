@@ -34,17 +34,21 @@ app = FastAPI(
 # CORS middleware configuration
 cors_origins = settings.BACKEND_CORS_ORIGINS or [
     "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5173", 
     "http://localhost:5174",
     "http://127.0.0.1:5174",
+    "https://rentguy.co",
+    "https://www.rentguy.co",
+    "https://rentguy-production.up.railway.app",
     "*"
 ]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Include API router
