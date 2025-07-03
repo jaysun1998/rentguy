@@ -55,18 +55,31 @@ def setup_static_files():
     """Setup static file serving with proper MIME types"""
     # Try multiple possible static file locations
     possible_static_dirs = [
+        "/app/static",  # Railway deployment path
+        "../static",    # Local relative to backend
         os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "static"),
-        os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "frontend", "dist"),
-        "/app/static",
-        "/app/frontend/dist"
+        "/app/frontend/dist",
+        "static"        # If running from root
     ]
     
     static_dir = None
+    logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f"Looking for static files in: {possible_static_dirs}")
+    
     for directory in possible_static_dirs:
+        logger.info(f"Checking directory: {directory}")
         if os.path.exists(directory):
             static_dir = directory
             logger.info(f"Found static files at: {directory}")
+            # List contents for debugging
+            try:
+                contents = os.listdir(directory)
+                logger.info(f"Static directory contents: {contents}")
+            except Exception as e:
+                logger.warning(f"Could not list directory contents: {e}")
             break
+        else:
+            logger.info(f"Directory does not exist: {directory}")
     
     if static_dir:
         try:
@@ -211,17 +224,29 @@ async def serve_assets(file_path: str):
 @app.get("/", include_in_schema=False)
 async def read_frontend():
     """Serve frontend index.html or API info"""
+    logger.info(f"Root route accessed. STATIC_DIR: {STATIC_DIR}")
+    
     if STATIC_DIR:
         index_file = os.path.join(STATIC_DIR, "index.html")
+        logger.info(f"Looking for index.html at: {index_file}")
+        
         if os.path.exists(index_file):
+            logger.info(f"Serving index.html from: {index_file}")
             return FileResponse(index_file, media_type="text/html")
+        else:
+            logger.warning(f"index.html not found at: {index_file}")
+    else:
+        logger.warning("STATIC_DIR is None - no static files configured")
     
     # Fallback to API info if no frontend found
+    logger.info("Serving API info instead of frontend")
     return {
         "message": "RentGuy API is running!",
         "api_docs": "/api/v1/docs",
         "health_check": "/api/v1/health",
-        "version": settings.VERSION
+        "version": settings.VERSION,
+        "static_dir": STATIC_DIR,
+        "cwd": os.getcwd()
     }
 
 # Catch-all route for SPA routing (must be last)
