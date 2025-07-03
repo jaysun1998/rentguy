@@ -17,7 +17,8 @@ This guide explains how to configure Google OAuth authentication for RentGuy.
    - Choose "Web application"
    - Add your domain to authorized origins:
      - `http://localhost:5173` (for development)
-     - `https://your-domain.com` (for production)
+     - `https://your-railway-app.up.railway.app` (for Railway deployment)
+     - `https://your-custom-domain.com` (if using custom domain)
 
 ### 2. Configure Frontend
 
@@ -73,6 +74,15 @@ The required dependencies are already in `requirements.txt`:
 - Make sure `VITE_GOOGLE_CLIENT_ID` is set in frontend `.env`
 - Make sure `GOOGLE_CLIENT_ID` is set in backend environment
 
+### "redirect_uri_mismatch" error (Error 400)
+- **Most common issue**: Your Railway app URL isn't added to Google Cloud Console
+- Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+- Edit your OAuth 2.0 Client ID
+- Add your Railway deployment URL to "Authorized JavaScript origins":
+  - Example: `https://rentguy-production.up.railway.app`
+- **Important**: Use HTTPS, not HTTP for production domains
+- Save changes and wait a few minutes for Google to update
+
 ### "Invalid Google token" error
 - Check that your Google Client ID matches between frontend and backend
 - Ensure your domain is authorized in Google Cloud Console
@@ -81,4 +91,4 @@ The required dependencies are already in `requirements.txt`:
 ### Button doesn't appear
 - Check browser console for errors
 - Verify the Google Client ID is properly configured
-- Make sure `react-google-login` dependency is installed
+- Button shows "Continue with Google (Not Configured)" when VITE_GOOGLE_CLIENT_ID is missing
