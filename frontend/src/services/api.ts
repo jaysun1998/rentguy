@@ -1,39 +1,44 @@
 import { User, Property, ApiResponse, Tenant, Lease } from '../types/index';
 
-// Determine the base URL based on the environment
+// Runtime API URL determination - prevents build-time optimization
 const getApiBaseUrl = () => {
+  const env = import.meta.env;
+  const loc = window.location;
+  
   // 1. Check for environment variable first (highest priority)
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  if (env.VITE_API_URL) {
+    console.log('[API] Using environment API URL:', env.VITE_API_URL);
+    return env.VITE_API_URL;
   }
   
   // 2. For production, use same domain as frontend to avoid CORS
-  if (window.location.hostname === 'rentguy.co' || window.location.hostname === 'www.rentguy.co') {
+  const prodDomains = ['rentguy.co', 'www.rentguy.co'];
+  if (prodDomains.includes(loc.hostname)) {
+    console.log('[API] Using same-domain URL for production');
     return '/api/v1';
   }
   
-  // 3. Check for web container environments (like StackBlitz, CodeSandbox, etc.)
-  const isWebContainer = window.location.hostname.includes('webcontainer.io') || 
-                       window.location.hostname.includes('stackblitz.io') ||
-                       window.location.hostname.includes('codesandbox.io');
+  // 3. Check for web container environments
+  const webContainers = ['webcontainer.io', 'stackblitz.io', 'codesandbox.io'];
+  const isWebContainer = webContainers.some(container => loc.hostname.includes(container));
   
   if (isWebContainer) {
-    // For web containers, we need to use the full URL to the backend
-    // This should be set in the environment variables of your web container
+    console.log('[API] Using full URL for web container');
     return 'https://rentguy-production.up.railway.app/api/v1';
   }
   
   // 4. For local development with Vite proxy
-  if (import.meta.env.DEV) {
-    // Use relative URL which will be proxied by Vite
+  if (env.DEV) {
+    console.log('[API] Using dev proxy URL');
     return '/api';
   }
   
   // 5. Default fallback URL
+  console.log('[API] Using fallback URL');
   return 'https://rentguy-production.up.railway.app/api/v1';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+// Dynamic API base URL is computed by the getter in ApiService class
 
 export class ApiError extends Error {
   status: number;
@@ -51,12 +56,15 @@ export class ApiError extends Error {
 }
 
 class ApiService {
-  private baseUrl: string;
   private token: string | null = null;
 
-  constructor(baseUrl: string = API_BASE_URL) {
-    this.baseUrl = baseUrl;
+  constructor() {
     this.token = localStorage.getItem('access_token');
+  }
+
+  private get baseUrl(): string {
+    // Compute base URL dynamically each time it's accessed
+    return getApiBaseUrl();
   }
 
   setToken(token: string) {
