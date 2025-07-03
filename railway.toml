@@ -1,10 +1,7 @@
-[build]
-buildCommand = "./build.sh"
-
 [deploy]
-startCommand = "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+startCommand = "python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT"
 healthcheckPath = "/api/v1/health"
-healthcheckTimeout = 30
+healthcheckTimeout = 300
 restartPolicyType = "always"
 
 [env]
