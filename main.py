@@ -6,7 +6,17 @@ import sys
 import os
 
 # Add the current directory to Python path so backend module can be imported
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
+# Also add the backend directory to the path
+backend_dir = os.path.join(current_dir, 'backend')
+if os.path.exists(backend_dir):
+    sys.path.insert(0, backend_dir)
+
+print(f"Current directory: {current_dir}")
+print(f"Backend directory: {backend_dir}")
+print(f"Python path: {sys.path[:3]}")
 
 try:
     # Import the full backend app with all features
