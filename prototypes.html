@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentGuy - Live Prototypes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .prototypes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 40px;
+        }
+        
+        .prototype {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #4f46e5;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .prototype:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .prototype h3 {
+            color: #1e293b;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .prototype-content {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+        
+        .chat-area {
+            height: 200px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            background: #f9fafb;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        
+        .message.sent {
+            background: #4f46e5;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.received {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .task-item {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .task-item.completed {
+            background: #d1fae5;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .income-summary {
+            background: #ecfdf5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .income-summary h4 {
+            color: #065f46;
+            margin-bottom: 10px;
+        }
+        
+        .income-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #059669;
+        }
+        
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 12px;
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RentGuy Property Management</h1>
+            <p>Live Prototypes - Working Demo</p>
+        </div>
+        
+        <div class="prototypes">
+            <!-- Income Tracker -->
+            <div class="prototype">
+                <h3>💰 Income Tracker</h3>
+                <div class="prototype-content">
+                    <div class="input-group">
+                        <label>Property</label>
+                        <select id="propertySelect">
+                            <option>Apartment 1A - Main Street</option>
+                            <option>House 2B - Oak Avenue</option>
+                            <option>Studio 3C - Pine Road</option>
+                            <option>Duplex 4D - Elm Street</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Amount (€)</label>
+                        <input type="number" id="incomeAmount" placeholder="1200">
+                    </div>
+                    <div class="input-group">
+                        <label>Type</label>
+                        <select id="incomeType">
+                            <option>Monthly Rent</option>
+                            <option>Security Deposit</option>
+                            <option>Utilities</option>
+                            <option>Late Fee</option>
+                            <option>Maintenance Fee</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="addIncome()">Add Income</button>
+                    
+                    <div class="income-summary">
+                        <h4>Monthly Total</h4>
+                        <div class="income-amount" id="totalIncome">€3,600</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- WhatsApp Chatbot -->
+            <div class="prototype">
+                <h3>💬 WhatsApp Chatbot</h3>
+                <div class="prototype-content">
+                    <div class="chat-area" id="chatArea">
+                        <div class="message received">Hi! I'm your RentGuy assistant. How can I help you today?</div>
+                        <div class="message sent">What's my rent payment status?</div>
+                        <div class="message received">Your rent for Unit 1A is current. Next payment due: Aug 1st, 2025 (€1,200)</div>
+                        <div class="message sent">Can you schedule a maintenance request?</div>
+                        <div class="message received">I can help you with that! What type of maintenance do you need?</div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                    </div>
+                    <button class="btn" onclick="sendMessage()">Send Message</button>
+                </div>
+            </div>
+            
+            <!-- Task Manager -->
+            <div class="prototype">
+                <h3>✅ Task Manager</h3>
+                <div class="prototype-content">
+                    <div class="input-group">
+                        <input type="text" id="taskInput" placeholder="Add new task..." onkeypress="handleTaskKeyPress(event)">
+                    </div>
+                    <button class="btn" onclick="addTask()">Add Task</button>
+                    
+                    <div id="taskList" style="margin-top: 20px;">
+                        <div class="task-item">
+                            <span>Inspect plumbing in Unit 2B</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                        <div class="task-item">
+                            <span>Schedule carpet cleaning</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                        <div class="task-item completed">
+                            <span>Collect rent from Unit 1A</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">↻</button>
+                        </div>
+                        <div class="task-item">
+                            <span>Review lease agreement for Unit 3C</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let totalAmount = 3600;
+        
+        function addIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const property = document.getElementById('propertySelect').value;
+            const type = document.getElementById('incomeType').value;
+            
+            if (amount && amount > 0) {
+                totalAmount += amount;
+                document.getElementById('totalIncome').textContent = `€${totalAmount.toLocaleString()}`;
+                
+                // Show success message
+                alert(`✅ Added: €${amount} from ${property} (${type})`);
+                document.getElementById('incomeAmount').value = '';
+                
+                // Add to chat as notification
+                const chatArea = document.getElementById('chatArea');
+                const notification = document.createElement('div');
+                notification.className = 'message received';
+                notification.textContent = `Income recorded: €${amount} from ${property}`;
+                chatArea.appendChild(notification);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } else {
+                alert('Please enter a valid amount');
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const chatArea = document.getElementById('chatArea');
+            
+            if (input.value.trim()) {
+                const message = document.createElement('div');
+                message.className = 'message sent';
+                message.textContent = input.value;
+                chatArea.appendChild(message);
+                
+                // Auto-reply with relevant responses
+                setTimeout(() => {
+                    const replies = [
+                        'I understand your request. Let me help you with that.',
+                        'I can assist you with property management tasks.',
+                        'Would you like me to schedule that for you?',
+                        'I can check your property records for that information.',
+                        'That sounds like a priority item. I\'ll make a note of it.'
+                    ];
+                    
+                    const reply = document.createElement('div');
+                    reply.className = 'message received';
+                    reply.textContent = replies[Math.floor(Math.random() * replies.length)];
+                    chatArea.appendChild(reply);
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                }, 1000);
+                
+                input.value = '';
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+            
+            if (input.value.trim()) {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <span>${input.value}</span>
+                    <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                `;
+                taskList.appendChild(taskItem);
+                input.value = '';
+                
+                // Add to chat as notification
+                const chatArea = document.getElementById('chatArea');
+                const notification = document.createElement('div');
+                notification.className = 'message received';
+                notification.textContent = `New task added: ${input.value}`;
+                chatArea.appendChild(notification);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+        
+        function handleTaskKeyPress(event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        }
+        
+        function toggleTask(button) {
+            const taskItem = button.closest('.task-item');
+            const taskText = taskItem.querySelector('span').textContent;
+            
+            taskItem.classList.toggle('completed');
+            
+            if (taskItem.classList.contains('completed')) {
+                button.textContent = '↻';
+                
+                // Add to chat as notification
+                const chatArea = document.getElementById('chatArea');
+                const notification = document.createElement('div');
+                notification.className = 'message received';
+                notification.textContent = `Task completed: ${taskText}`;
+                chatArea.appendChild(notification);
+                chatArea.scrollTop = chatArea.scrollHeight;
+            } else {
+                button.textContent = '✓';
+            }
+        }
+    </script>
+</body>
+</html>
