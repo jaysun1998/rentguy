@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentGuy - Property Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+        
+        .prototypes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .prototype {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .prototype:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        
+        .prototype h3 {
+            color: #4f46e5;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .prototype-content {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .chat-area {
+            height: 250px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow-y: auto;
+            background: white;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .message.sent {
+            background: #4f46e5;
+            color: white;
+            margin-left: auto;
+        }
+        
+        .message.received {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        
+        .task-item {
+            background: white;
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+        
+        .task-item:hover {
+            border-color: #4f46e5;
+        }
+        
+        .task-item.completed {
+            background: #ecfdf5;
+            text-decoration: line-through;
+            opacity: 0.7;
+            border-color: #10b981;
+        }
+        
+        .income-summary {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 2px solid #10b981;
+        }
+        
+        .income-summary h4 {
+            color: #065f46;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .income-amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #059669;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2rem; }
+            .prototypes { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RentGuy</h1>
+            <p>Property Management System - Live Prototypes</p>
+        </div>
+        
+        <div class="prototypes">
+            <!-- Income Tracker -->
+            <div class="prototype">
+                <h3>💰 Income Tracker</h3>
+                <div class="prototype-content">
+                    <div class="input-group">
+                        <label>Property</label>
+                        <select id="propertySelect">
+                            <option>Apartment 1A - Main Street</option>
+                            <option>House 2B - Oak Avenue</option>
+                            <option>Studio 3C - Pine Road</option>
+                            <option>Duplex 4D - Elm Street</option>
+                            <option>Townhouse 5E - Maple Lane</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Amount (€)</label>
+                        <input type="number" id="incomeAmount" placeholder="Enter amount">
+                    </div>
+                    <div class="input-group">
+                        <label>Type</label>
+                        <select id="incomeType">
+                            <option>Monthly Rent</option>
+                            <option>Security Deposit</option>
+                            <option>Utilities</option>
+                            <option>Late Fee</option>
+                            <option>Maintenance Fee</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="addIncome()">Add Income</button>
+                    
+                    <div class="income-summary">
+                        <h4>Monthly Total</h4>
+                        <div class="income-amount" id="totalIncome">€4,200</div>
+                        <div class="status-indicator status-success">✓ On Track</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- WhatsApp Chatbot -->
+            <div class="prototype">
+                <h3>💬 WhatsApp Chatbot</h3>
+                <div class="prototype-content">
+                    <div class="chat-area" id="chatArea">
+                        <div class="message received">Hello! I'm your RentGuy assistant. How can I help you today?</div>
+                        <div class="message sent">Check my rent status</div>
+                        <div class="message received">Your rent is current for all properties. Next payment due: Aug 1st, 2025</div>
+                        <div class="message sent">Schedule maintenance</div>
+                        <div class="message received">I can help schedule that! What type of maintenance do you need?</div>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="messageInput" placeholder="Type your message...">
+                    </div>
+                    <button class="btn" onclick="sendMessage()">Send Message</button>
+                    <div class="status-indicator status-success">✓ Active</div>
+                </div>
+            </div>
+            
+            <!-- Task Manager -->
+            <div class="prototype">
+                <h3>✅ Task Manager</h3>
+                <div class="prototype-content">
+                    <div class="input-group">
+                        <input type="text" id="taskInput" placeholder="Add new task...">
+                    </div>
+                    <button class="btn" onclick="addTask()">Add Task</button>
+                    
+                    <div id="taskList" style="margin-top: 25px;">
+                        <div class="task-item">
+                            <span>Inspect plumbing in Unit 2B</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                        <div class="task-item">
+                            <span>Schedule carpet cleaning</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                        <div class="task-item completed">
+                            <span>Collect rent from Unit 1A</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">↻</button>
+                        </div>
+                        <div class="task-item">
+                            <span>Review lease agreement for Unit 3C</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                        <div class="task-item">
+                            <span>Schedule property inspection</span>
+                            <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                        </div>
+                    </div>
+                    <div class="status-indicator status-warning">3 Pending Tasks</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let totalAmount = 4200;
+        let taskCount = 3;
+        
+        function addIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const property = document.getElementById('propertySelect').value;
+            const type = document.getElementById('incomeType').value;
+            
+            if (amount && amount > 0) {
+                totalAmount += amount;
+                document.getElementById('totalIncome').textContent = `€${totalAmount.toLocaleString()}`;
+                
+                // Show success message
+                alert(`✅ Income Added!\n\nAmount: €${amount}\nProperty: ${property}\nType: ${type}\n\nNew Total: €${totalAmount.toLocaleString()}`);
+                document.getElementById('incomeAmount').value = '';
+                
+                // Add notification to chat
+                addChatNotification(`Income recorded: €${amount} from ${property.split(' - ')[0]}`);
+            } else {
+                alert('Please enter a valid amount');
+            }
+        }
+        
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const chatArea = document.getElementById('chatArea');
+            
+            if (input.value.trim()) {
+                // Add user message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message sent';
+                userMessage.textContent = input.value;
+                chatArea.appendChild(userMessage);
+                
+                // Generate smart reply
+                const userText = input.value.toLowerCase();
+                let reply = 'I understand your request. Let me help you with that.';
+                
+                if (userText.includes('rent')) {
+                    reply = 'All rent payments are current. Next collection date is August 1st, 2025.';
+                } else if (userText.includes('maintenance')) {
+                    reply = 'I can schedule maintenance for you. What type of work is needed?';
+                } else if (userText.includes('tenant')) {
+                    reply = 'I can help you manage tenant information and communications.';
+                } else if (userText.includes('property')) {
+                    reply = 'You currently manage 5 properties. Would you like details on any specific property?';
+                } else if (userText.includes('payment')) {
+                    reply = 'Payment tracking is available. All recent payments have been processed successfully.';
+                }
+                
+                // Add bot reply
+                setTimeout(() => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message received';
+                    botMessage.textContent = reply;
+                    chatArea.appendChild(botMessage);
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                }, 800);
+                
+                input.value = '';
+                chatArea.scrollTop = chatArea.scrollHeight;
+            }
+        }
+        
+        function addChatNotification(message) {
+            const chatArea = document.getElementById('chatArea');
+            const notification = document.createElement('div');
+            notification.className = 'message received';
+            notification.textContent = message;
+            chatArea.appendChild(notification);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+            
+            if (input.value.trim()) {
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <span>${input.value}</span>
+                    <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                `;
+                taskList.appendChild(taskItem);
+                
+                taskCount++;
+                updateTaskStatus();
+                
+                addChatNotification(`New task added: ${input.value}`);
+                input.value = '';
+            }
+        }
+        
+        function toggleTask(button) {
+            const taskItem = button.closest('.task-item');
+            const taskText = taskItem.querySelector('span').textContent;
+            
+            if (taskItem.classList.contains('completed')) {
+                taskItem.classList.remove('completed');
+                button.textContent = '✓';
+                taskCount++;
+                addChatNotification(`Task reopened: ${taskText}`);
+            } else {
+                taskItem.classList.add('completed');
+                button.textContent = '↻';
+                taskCount--;
+                addChatNotification(`Task completed: ${taskText}`);
+            }
+            
+            updateTaskStatus();
+        }
+        
+        function updateTaskStatus() {
+            const statusIndicator = document.querySelector('.prototype:last-child .status-indicator');
+            if (taskCount === 0) {
+                statusIndicator.textContent = '✓ All Tasks Complete';
+                statusIndicator.className = 'status-indicator status-success';
+            } else {
+                statusIndicator.textContent = `${taskCount} Pending Tasks`;
+                statusIndicator.className = 'status-indicator status-warning';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        document.getElementById('taskInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+        
+        // Initialize
+        updateTaskStatus();
+    </script>
+</body>
+</html>
