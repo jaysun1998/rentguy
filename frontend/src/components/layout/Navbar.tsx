@@ -66,14 +66,14 @@ const Navbar: React.FC = () => {
                 About
               </Link>
               <Link 
-                to="/resources" 
+                to="/demo" 
                 className={`px-3 py-2 text-sm font-medium transition-colors ${
-                  isActive('/resources') 
+                  isActive('/demo') 
                     ? 'text-primary border-b-2 border-primary' 
                     : 'text-neutral-600 hover:text-primary'
                 }`}
               >
-                Resources
+                Demo
               </Link>
             </div>
           </div>
@@ -180,14 +180,14 @@ const Navbar: React.FC = () => {
               About
             </Link>
             <Link 
-              to="/resources" 
+              to="/demo" 
               className={`block px-4 py-2 text-base font-medium ${
-                isActive('/resources') 
+                isActive('/demo') 
                   ? 'text-primary bg-primary-50' 
                   : 'text-neutral-600 hover:bg-neutral-100'
               }`}
             >
-              Resources
+              Demo
             </Link>
           </div>
           

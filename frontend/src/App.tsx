@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import Features from './pages/Features';
 import Pricing from './pages/Pricing';
 import About from './pages/About';
+import Demo from './pages/Demo';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -54,6 +55,7 @@ function AppContent() {
         <Route path="/features" element={<Features />} />
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/about" element={<About />} />
+        <Route path="/demo" element={<Demo />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
