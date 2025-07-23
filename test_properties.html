@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Property Features</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .input-group input, .input-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        .btn:hover { background: #0056b3; }
+        .btn-small { padding: 6px 12px; font-size: 14px; }
+        .form-hidden { display: none; padding: 15px; background: #f8f9fa; border-radius: 4px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Income Tracker - Property Management Test</h1>
+    
+    <div class="input-group">
+        <label>Property</label>
+        <select id="propertySelect">
+            <option>Apartment 1A - Main Street</option>
+            <option>House 2B - Oak Avenue</option>
+            <option>Studio 3C - Pine Road</option>
+            <option>Duplex 4D - Elm Street</option>
+            <option>Townhouse 5E - Maple Lane</option>
+        </select>
+        <div style="margin-top: 10px;">
+            <button class="btn btn-small" onclick="showAddPropertyForm()" style="background: #28a745;">+ Add Property</button>
+            <button class="btn btn-small" onclick="deleteProperty()" style="background: #dc3545;">- Delete Property</button>
+        </div>
+    </div>
+    
+    <!-- Add Property Form (initially hidden) -->
+    <div id="addPropertyForm" class="form-hidden">
+        <h3>Add New Property</h3>
+        <div class="input-group">
+            <label>Property Name</label>
+            <input type="text" id="newPropertyName" placeholder="e.g. Apartment 2F">
+        </div>
+        <div class="input-group">
+            <label>Address</label>
+            <input type="text" id="newPropertyAddress" placeholder="e.g. Sunset Boulevard">
+        </div>
+        <div>
+            <button class="btn" onclick="addProperty()" style="background: #28a745;">Add Property</button>
+            <button class="btn" onclick="cancelAddProperty()" style="background: #6c757d;">Cancel</button>
+        </div>
+    </div>
+    
+    <div class="input-group">
+        <label>Amount (€)</label>
+        <input type="number" id="incomeAmount" placeholder="Enter amount">
+    </div>
+    
+    <div class="input-group">
+        <label>Type</label>
+        <select id="incomeType">
+            <option>Monthly Rent</option>
+            <option>Security Deposit</option>
+            <option>Utilities</option>
+            <option>Late Fee</option>
+            <option>Maintenance Fee</option>
+            <option>Other</option>
+        </select>
+    </div>
+    
+    <button class="btn" onclick="addIncome()">Add Income</button>
+    
+    <div style="margin-top: 20px; padding: 15px; background: #e8f5e8; border-radius: 4px;">
+        <h4>Monthly Total</h4>
+        <div style="font-size: 24px; font-weight: bold; color: #28a745;" id="totalIncome">€4,200</div>
+        <div style="color: #28a745;">✓ On Track</div>
+    </div>
+
+    <script>
+        let totalAmount = 4200;
+        let properties = [
+            'Apartment 1A - Main Street',
+            'House 2B - Oak Avenue',
+            'Studio 3C - Pine Road',
+            'Duplex 4D - Elm Street',
+            'Townhouse 5E - Maple Lane'
+        ];
+
+        function showAddPropertyForm() {
+            const form = document.getElementById('addPropertyForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function addProperty() {
+            const name = document.getElementById('newPropertyName').value.trim();
+            const address = document.getElementById('newPropertyAddress').value.trim();
+            
+            if (!name || !address) {
+                alert('Please enter both property name and address');
+                return;
+            }
+            
+            const newProperty = `${name} - ${address}`;
+            properties.push(newProperty);
+            updatePropertySelect();
+            
+            // Clear form and hide it
+            document.getElementById('newPropertyName').value = '';
+            document.getElementById('newPropertyAddress').value = '';
+            document.getElementById('addPropertyForm').style.display = 'none';
+            
+            // Select the new property
+            document.getElementById('propertySelect').value = newProperty;
+            
+            alert(`✅ Property Added!\n\n${newProperty}\n\nThe property has been added to your portfolio.`);
+        }
+        
+        function deleteProperty() {
+            const propertySelect = document.getElementById('propertySelect');
+            const selectedProperty = propertySelect.value;
+            
+            if (properties.length <= 1) {
+                alert('Cannot delete the last property. You must have at least one property.');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete "${selectedProperty}"?`)) {
+                const index = properties.indexOf(selectedProperty);
+                if (index > -1) {
+                    properties.splice(index, 1);
+                    updatePropertySelect();
+                    alert(`🗑️ Property Deleted!\n\n${selectedProperty}\n\nThe property has been removed from your portfolio.`);
+                }
+            }
+        }
+        
+        function cancelAddProperty() {
+            document.getElementById('newPropertyName').value = '';
+            document.getElementById('newPropertyAddress').value = '';
+            document.getElementById('addPropertyForm').style.display = 'none';
+        }
+        
+        function updatePropertySelect() {
+            const propertySelect = document.getElementById('propertySelect');
+            const currentValue = propertySelect.value;
+            
+            // Clear existing options
+            propertySelect.innerHTML = '';
+            
+            // Add all properties
+            properties.forEach(property => {
+                const option = document.createElement('option');
+                option.value = property;
+                option.textContent = property;
+                propertySelect.appendChild(option);
+            });
+            
+            // Try to keep the same selection, or select the first one
+            if (properties.includes(currentValue)) {
+                propertySelect.value = currentValue;
+            } else {
+                propertySelect.selectedIndex = 0;
+            }
+        }
+
+        function addIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const property = document.getElementById('propertySelect').value;
+            const type = document.getElementById('incomeType').value;
+            
+            if (amount && amount > 0) {
+                totalAmount += amount;
+                document.getElementById('totalIncome').textContent = `€${totalAmount.toLocaleString()}`;
+                
+                alert(`✅ Income Added!\n\nAmount: €${amount}\nProperty: ${property}\nType: ${type}\n\nNew Total: €${totalAmount.toLocaleString()}`);
+                document.getElementById('incomeAmount').value = '';
+            } else {
+                alert('Please enter a valid amount');
+            }
+        }
+    </script>
+</body>
+</html>

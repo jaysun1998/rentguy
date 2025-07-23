@@ -20,6 +20,11 @@ export default defineConfig({
     }
   },
   server: {
+    host: '127.0.0.1',
+    port: 5173,
+    strictPort: true,
+    open: true,
+    cors: true,
     proxy: {
       '/api': {
         target: process.env.VITE_API_URL || 'http://localhost:8000',
@@ -27,6 +32,16 @@ export default defineConfig({
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api/v1')
       }
+    },
+    fs: {
+      strict: false
     }
+  },
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom'],
+    force: true
   }
 });

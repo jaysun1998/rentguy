@@ -128,6 +128,26 @@
             padding: 8px 16px;
             font-size: 14px;
             width: auto;
+            margin: 2px;
+        }
+        
+        .property-management {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+        
+        .form-row .input-group {
+            flex: 1;
+            margin-bottom: 0;
         }
         
         .chat-area {
@@ -253,6 +273,29 @@
                             <option>Duplex 4D - Elm Street</option>
                             <option>Townhouse 5E - Maple Lane</option>
                         </select>
+                        <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button class="btn btn-small" onclick="showAddPropertyForm()" style="background: #10b981; color: white; font-weight: bold;">+ Add Property</button>
+                            <button class="btn btn-small" onclick="deleteProperty()" style="background: #dc2626; color: white; font-weight: bold;">- Delete Property</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Add Property Form (initially hidden) -->
+                    <div id="addPropertyForm" class="property-management" style="display: none;">
+                        <h4 style="margin-top: 0; color: #374151;">📍 Add New Property</h4>
+                        <div class="form-row">
+                            <div class="input-group">
+                                <label>Property Name</label>
+                                <input type="text" id="newPropertyName" placeholder="e.g. Apartment 2F">
+                            </div>
+                            <div class="input-group">
+                                <label>Address</label>
+                                <input type="text" id="newPropertyAddress" placeholder="e.g. Sunset Boulevard">
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-small" onclick="addProperty()" style="background: #10b981; color: white;">✓ Add Property</button>
+                            <button class="btn btn-small" onclick="cancelAddProperty()" style="background: #6b7280; color: white;">✕ Cancel</button>
+                        </div>
                     </div>
                     <div class="input-group">
                         <label>Amount (€)</label>
@@ -305,28 +348,33 @@
                     <div class="input-group">
                         <input type="text" id="taskInput" placeholder="Add new task...">
                     </div>
-                    <button class="btn" onclick="addTask()">Add Task</button>
+                    <button class="btn" onclick="addTask()">+ Add Task</button>
                     
                     <div id="taskList" style="margin-top: 25px;">
                         <div class="task-item">
                             <span>Inspect plumbing in Unit 2B</span>
                             <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                            <button class="btn btn-small" onclick="deleteTask(this)" style="background: #dc2626; margin-left: 5px;">✕</button>
                         </div>
                         <div class="task-item">
                             <span>Schedule carpet cleaning</span>
                             <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                            <button class="btn btn-small" onclick="deleteTask(this)" style="background: #dc2626; margin-left: 5px;">✕</button>
                         </div>
                         <div class="task-item completed">
                             <span>Collect rent from Unit 1A</span>
                             <button class="btn btn-small" onclick="toggleTask(this)">↻</button>
+                            <button class="btn btn-small" onclick="deleteTask(this)" style="background: #dc2626; margin-left: 5px;">✕</button>
                         </div>
                         <div class="task-item">
                             <span>Review lease agreement for Unit 3C</span>
                             <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                            <button class="btn btn-small" onclick="deleteTask(this)" style="background: #dc2626; margin-left: 5px;">✕</button>
                         </div>
                         <div class="task-item">
                             <span>Schedule property inspection</span>
                             <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                            <button class="btn btn-small" onclick="deleteTask(this)" style="background: #dc2626; margin-left: 5px;">✕</button>
                         </div>
                     </div>
                     <div class="status-indicator status-warning">3 Pending Tasks</div>
@@ -338,6 +386,13 @@
     <script>
         let totalAmount = 4200;
         let taskCount = 3;
+        let properties = [
+            'Apartment 1A - Main Street',
+            'House 2B - Oak Avenue',
+            'Studio 3C - Pine Road',
+            'Duplex 4D - Elm Street',
+            'Townhouse 5E - Maple Lane'
+        ];
         
         function addIncome() {
             const amount = parseFloat(document.getElementById('incomeAmount').value);
@@ -419,6 +474,7 @@
                 taskItem.innerHTML = `
                     <span>${input.value}</span>
                     <button class="btn btn-small" onclick="toggleTask(this)">✓</button>
+                    <button class="btn btn-small" onclick="deleteTask(this)" style="background: #dc2626; margin-left: 5px;">✕</button>
                 `;
                 taskList.appendChild(taskItem);
                 
@@ -449,6 +505,19 @@
             updateTaskStatus();
         }
         
+        function deleteTask(button) {
+            const taskItem = button.closest('.task-item');
+            const taskText = taskItem.querySelector('span').textContent;
+            
+            if (!taskItem.classList.contains('completed')) {
+                taskCount--;
+            }
+            
+            taskItem.remove();
+            addChatNotification(`Task deleted: ${taskText}`);
+            updateTaskStatus();
+        }
+        
         function updateTaskStatus() {
             const statusIndicator = document.querySelector('.prototype:last-child .status-indicator');
             if (taskCount === 0) {
@@ -457,6 +526,85 @@
             } else {
                 statusIndicator.textContent = `${taskCount} Pending Tasks`;
                 statusIndicator.className = 'status-indicator status-warning';
+            }
+        }
+        
+        function showAddPropertyForm() {
+            const form = document.getElementById('addPropertyForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function addProperty() {
+            const name = document.getElementById('newPropertyName').value.trim();
+            const address = document.getElementById('newPropertyAddress').value.trim();
+            
+            if (!name || !address) {
+                alert('Please enter both property name and address');
+                return;
+            }
+            
+            const newProperty = `${name} - ${address}`;
+            properties.push(newProperty);
+            updatePropertySelect();
+            
+            // Clear form and hide it
+            document.getElementById('newPropertyName').value = '';
+            document.getElementById('newPropertyAddress').value = '';
+            document.getElementById('addPropertyForm').style.display = 'none';
+            
+            // Select the new property
+            document.getElementById('propertySelect').value = newProperty;
+            
+            addChatNotification(`New property added: ${newProperty}`);
+            alert(`✅ Property Added!\n\n${newProperty}\n\nThe property has been added to your portfolio.`);
+        }
+        
+        function deleteProperty() {
+            const propertySelect = document.getElementById('propertySelect');
+            const selectedProperty = propertySelect.value;
+            
+            if (properties.length <= 1) {
+                alert('Cannot delete the last property. You must have at least one property.');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete "${selectedProperty}"?`)) {
+                const index = properties.indexOf(selectedProperty);
+                if (index > -1) {
+                    properties.splice(index, 1);
+                    updatePropertySelect();
+                    addChatNotification(`Property deleted: ${selectedProperty}`);
+                    alert(`🗑️ Property Deleted!\n\n${selectedProperty}\n\nThe property has been removed from your portfolio.`);
+                }
+            }
+        }
+        
+        function cancelAddProperty() {
+            document.getElementById('newPropertyName').value = '';
+            document.getElementById('newPropertyAddress').value = '';
+            document.getElementById('addPropertyForm').style.display = 'none';
+        }
+        
+        function updatePropertySelect() {
+            const propertySelect = document.getElementById('propertySelect');
+            const currentValue = propertySelect.value;
+            
+            // Clear existing options
+            propertySelect.innerHTML = '';
+            
+            // Add all properties
+            properties.forEach(property => {
+                const option = document.createElement('option');
+                option.value = property;
+                option.textContent = property;
+                propertySelect.appendChild(option);
+            });
+            
+            // Try to keep the same selection, or select the first one
+            if (properties.includes(currentValue)) {
+                propertySelect.value = currentValue;
+            } else {
+                propertySelect.selectedIndex = 0;
             }
         }
         
